@@ -40,6 +40,6 @@ class DashboardController extends Controller
 
         // file_put_contents(public_path('transactions/' . auth('web')->user()->slug . '.json'), json_encode($formatted_data));
 
-        return view('backend.layouts.dashboard');
+        // return view('backend.layouts.dashboard');
     }
 }

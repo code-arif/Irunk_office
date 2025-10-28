@@ -141,5 +141,5 @@ use Illuminate\Support\Facades\DB;
 @endsection
 
 @push('scripts')
-
+{{-- sagor --}}
 @endpush
