@@ -215,7 +215,7 @@ Route::prefix('cms')->name('cms.')->group(function () {
         Route::post('/why-desi-carousel/update', 'whyDesiCarouselUpdate')->name('why.desi.carousel.update');
         Route::post('/trust-and-sefty/update', 'trustAndService')->name('trust-and-sefty.update');
     });
-    
+
 });
 
 /*
