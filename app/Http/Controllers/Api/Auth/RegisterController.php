@@ -161,9 +161,14 @@ class RegisterController extends Controller
             $user->save();
 
             //* Send the new OTP to the user's email
-             Mail::to($user->email)->send(new OtpMail($newOtp, $user, 'Verify Your Email Address'));
+            //  Mail::to($user->email)->send(new OtpMail($newOtp, $user, 'Verify Your Email Address'));
 
-            return Helper::jsonResponse(true, 'A new OTP has been sent to your email.', 200);
+            return response()->json([
+                'status'  => true,
+                'message' => 'A new OTP has been sent to your email address.',
+                'code'    => 200,
+                'otp'     => $newOtp // Remove this line in production
+            ], 200);
         } catch (Exception $e) {
             return Helper::jsonErrorResponse($e->getMessage(), 200);
         }
