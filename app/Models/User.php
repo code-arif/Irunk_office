@@ -3,12 +3,14 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Stripe\Plan;
+use Stripe\Product;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -174,31 +176,58 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(AddToCart::class);
     }
 
-    // follow unfollow
-
-    // User.php (Model)
-    public function followers()
-    {
-        return $this->hasMany(Follow::class, 'following_id');
-    }
-
-    public function followings()
-    {
-        return $this->hasMany(Follow::class, 'follower_id');
-    }
-
-    public function isFollowing($userId)
-    {
-        return $this->followings()->where('following_id', $userId)->exists();
-    }
-    public function deliveryAddress()
-    {
-        return $this->hasOne(DeliveryAddress::class, 'user_id');
-    }
-
     // product like
     public function likedProducts()
     {
         return $this->belongsToMany(Product::class, 'product_likes')->withTimestamps();
+    }
+
+    // Friend requests
+    public function sentRequests()
+    {
+        return $this->hasMany(FriendRequest::class, 'sender_id');
+    }
+
+    // Receive requests
+    public function receivedRequests()
+    {
+        return $this->hasMany(FriendRequest::class, 'receiver_id');
+    }
+
+    // User Model
+    public function friends()
+    {
+        // where user_id is me
+        $friends1 = $this->belongsToMany(
+            User::class,
+            'friends',
+            'user_id',
+            'friend_id'
+        )->withTimestamps()->withPivot('became_friends_at');
+
+        // Where friend_id is me
+        $friends2 = $this->belongsToMany(
+            User::class,
+            'friends',
+            'friend_id',
+            'user_id'
+        )->withTimestamps()->withPivot('became_friends_at');
+
+        // When do Union then the same columns specify
+        return $friends1->union($friends2->getQuery());
+    }
+
+    public function friendOf()
+    {
+        return $this->belongsToMany(User::class, 'friends', 'friend_id', 'user_id')
+            ->withTimestamps();
+    }
+
+    // Optional: Combined friends (both directions)
+    public function allFriends()
+    {
+        return $this->friends()->orWhere(function ($query) {
+            $query->whereIn('friend_id', $this->friendOf()->pluck('user_id'));
+        });
     }
 }

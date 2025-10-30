@@ -33,7 +33,7 @@ class RegisterController extends Controller
         $request->validate([
             'name'       => 'required|string|max:100',
             'email'      => 'required|string|email|max:150|unique:users',
-            'password'   => 'required|string|min:6|confirmed',          
+            'password'   => 'required|string|min:6|confirmed',
             'agree'      => 'required|in:true',
         ]);
         try {
@@ -80,7 +80,7 @@ class RegisterController extends Controller
 
             $data = User::select($this->select)->with('roles')->find($user->id);
 
-             Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your Email Address'));
+            //  Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your Email Address'));
 
             DB::commit();
 
@@ -95,7 +95,7 @@ class RegisterController extends Controller
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
                 'data' => $data
             ], 200);
-            
+
         } catch (Exception $e) {
             DB::rollBack();
             return Helper::jsonErrorResponse('User registration failed', 500, [$e->getMessage()]);

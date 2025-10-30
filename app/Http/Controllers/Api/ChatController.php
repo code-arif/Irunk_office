@@ -17,11 +17,14 @@ class ChatController extends Controller
 {
     public function index() {}
 
+    /**
+     * User list
+     */
     public function list(): JsonResponse
     {
         // Get the authenticated user
         $authUser = Auth::guard('api')->user();
-        
+
         // Fetch users who are connected as senders or receivers with the authenticated user
         $users = User::select('id', 'name', 'email', 'avatar', 'last_activity_at')
             ->whereHas('senders', function ($query) use ($authUser) {
@@ -37,14 +40,14 @@ class ChatController extends Controller
         $usersWithMessages = $users->map(function ($user) use ($authUser) {
             $lastChat = Chat::where(function ($query) use ($user, $authUser) {
                 $query->where('sender_id', $authUser->id)
-                      ->where('receiver_id', $user->id);
+                    ->where('receiver_id', $user->id);
             })
-            ->orWhere(function ($query) use ($user, $authUser) {
-                $query->where('sender_id', $user->id)
-                      ->where('receiver_id', $authUser->id);
-            })
-            ->latest()
-            ->first();
+                ->orWhere(function ($query) use ($user, $authUser) {
+                    $query->where('sender_id', $user->id)
+                        ->where('receiver_id', $authUser->id);
+                })
+                ->latest()
+                ->first();
 
             $user->last_chat = $lastChat;
             return $user;
@@ -66,16 +69,18 @@ class ChatController extends Controller
         ], 200);
     }
 
-
+    /**
+     * Serach user
+     */
     public function search(Request $request): JsonResponse
     {
         $user_id = Auth::guard('api')->id();
 
         $keyword = $request->get('keyword');
         $users = User::select('id', 'name', 'email', 'avatar', 'last_activity_at')
-        ->where('id', '!=', $user_id)
-        ->where('name', 'LIKE', "%{$keyword}%")->orWhere('email', 'LIKE', "%{$keyword}%")
-        ->get();
+            ->where('id', '!=', $user_id)
+            ->where('name', 'LIKE', "%{$keyword}%")->orWhere('email', 'LIKE', "%{$keyword}%")
+            ->get();
 
         $data = [
             'users' => $users
@@ -90,17 +95,13 @@ class ChatController extends Controller
 
     /**
      ** Get messages between the authenticated user and another user
-     *
-     * @param User $user
-     * @param Request $request
-     * @return JsonResponse
      */
     public function conversation($receiver_id): JsonResponse
     {
         $sender_id = Auth::guard('api')->id();
 
         Chat::where('receiver_id', $sender_id)->where('sender_id', $receiver_id)->update(['status' => 'read']);
-        
+
         $chat = Chat::query()
             ->where(function ($query) use ($receiver_id, $sender_id) {
                 $query->where('sender_id', $sender_id)->where('receiver_id', $receiver_id);
@@ -117,10 +118,10 @@ class ChatController extends Controller
             ->paginate(50);
 
         $room = Room::where(function ($query) use ($receiver_id, $sender_id) {
-                $query->where('user_one_id', $receiver_id)->where('user_two_id', $sender_id);
-            })->orWhere(function ($query) use ($receiver_id, $sender_id) {
-                $query->where('user_one_id', $sender_id)->where('user_two_id', $receiver_id);
-            })->first();
+            $query->where('user_one_id', $receiver_id)->where('user_two_id', $sender_id);
+        })->orWhere(function ($query) use ($receiver_id, $sender_id) {
+            $query->where('user_one_id', $sender_id)->where('user_two_id', $receiver_id);
+        })->first();
 
         if (!$room) {
             $room = Room::create([
@@ -145,17 +146,13 @@ class ChatController extends Controller
     }
 
     /**
-     *! Send a message to another user
-     *
-     * @param User $user
-     * @param Request $request
-     * @return JsonResponse
+     * Send a message to another user
      */
     public function send($receiver_id, Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'text' => 'nullable|string|max:255',
-            'file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:1024',
+            'file' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -198,8 +195,8 @@ class ChatController extends Controller
 
         //* Load the sender's information
         $chat->load([
-            'sender:id,name,email,avatar,last_activity_at', 
-            'receiver:id,name,email,avatar,last_activity_at', 
+            'sender:id,name,email,avatar,last_activity_at',
+            'receiver:id,name,email,avatar,last_activity_at',
             'room:id,user_one_id,user_two_id'
         ]);
 
@@ -217,6 +214,9 @@ class ChatController extends Controller
         ]);
     }
 
+    /**
+     * Seen all message
+     */
     public function seenAll($receiver_id): JsonResponse
     {
         $sender_id = Auth::guard('api')->id();
@@ -240,6 +240,9 @@ class ChatController extends Controller
         ]);
     }
 
+    /**
+     * Seen single message
+     */
     public function seenSingle($chat_id): JsonResponse
     {
         $sender_id = Auth::guard('api')->id();
@@ -258,6 +261,9 @@ class ChatController extends Controller
         ]);
     }
 
+    /**
+     * Room
+     */
     public function room($receiver_id)
     {
         $sender_id = Auth::guard('api')->id();
@@ -268,11 +274,11 @@ class ChatController extends Controller
         }
 
         $room = Room::with(['userOne:id,name,email,avatar,last_activity_at', 'userTwo:id,name,email,avatar,last_activity_at'])
-        ->where(function ($query) use ($receiver_id, $sender_id) {
-            $query->where('user_one_id', $receiver_id)->where('user_two_id', $sender_id);
-        })->orWhere(function ($query) use ($receiver_id, $sender_id) {
-            $query->where('user_one_id', $sender_id)->where('user_two_id', $receiver_id);
-        })->first();
+            ->where(function ($query) use ($receiver_id, $sender_id) {
+                $query->where('user_one_id', $receiver_id)->where('user_two_id', $sender_id);
+            })->orWhere(function ($query) use ($receiver_id, $sender_id) {
+                $query->where('user_one_id', $sender_id)->where('user_two_id', $receiver_id);
+            })->first();
 
         if (!$room) {
             $room = Room::create([
@@ -286,5 +292,74 @@ class ChatController extends Controller
         ];
 
         return response()->json(['success' => true, 'message' => 'Group retrieved successfully', 'data' => $data, 'code' => 200]);
+    }
+
+    /**
+     * Delete chat with a specific user
+     */
+    public function deleteChat($receiver_id): JsonResponse
+    {
+        $sender_id = Auth::guard('api')->id();
+
+        // Find the room between these two users
+        $room = Room::where(function ($query) use ($receiver_id, $sender_id) {
+            $query->where('user_one_id', $sender_id)->where('user_two_id', $receiver_id);
+        })->orWhere(function ($query) use ($receiver_id, $sender_id) {
+            $query->where('user_one_id', $receiver_id)->where('user_two_id', $sender_id);
+        })->first();
+
+        if (!$room) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Conversation not found',
+                'data'    => [],
+                'code'    => 404
+            ]);
+        }
+
+        // Soft delete all messages in this room
+        Chat::where('room_id', $room->id)->delete();
+
+        // Delete the room itself
+        $room->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Conversation deleted successfully',
+            'data'    => [],
+            'code'    => 200
+        ]);
+    }
+
+    /*
+    * Delete messages
+    */
+    public function deleteMessages(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'message_ids' => 'required|array|min:1',
+            'message_ids.*' => 'exists:chats,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $authUser = Auth::guard('api')->user();
+
+        // Delete only messages where user is sender or receiver
+        $deleted = Chat::whereIn('id', $request->message_ids)
+            ->where(function ($query) use ($authUser) {
+                $query->where('sender_id', $authUser->id)
+                    ->orWhere('receiver_id', $authUser->id);
+            })
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Messages deleted successfully',
+            'data' => ['deleted_count' => $deleted],
+            'code' => 200
+        ]);
     }
 }
