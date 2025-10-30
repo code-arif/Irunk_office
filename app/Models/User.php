@@ -44,8 +44,11 @@ class User extends Authenticatable implements JWTSubject
         'slug',
         'avatar',
         'balance',
-        'otp_verified_at'
-
+        'otp_verified_at',
+        'bio',
+        'sex',
+        'country',
+        'age',
     ];
 
     /**
