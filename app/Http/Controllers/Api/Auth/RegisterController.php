@@ -25,7 +25,7 @@ class RegisterController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->select = ['id', 'name', 'email', 'otp', 'avatar', 'otp_verified_at', 'last_activity_at'];
+        $this->select = ['id', 'name', 'username', 'email', 'otp', 'avatar', 'otp_verified_at', 'last_activity_at'];
     }
 
     public function register(Request $request)
@@ -39,11 +39,19 @@ class RegisterController extends Controller
         try {
             DB::beginTransaction();
             do {
-                $slug = "user_".rand(1000000000, 9999999999);
+                $slug = "user_" . rand(1000000000, 9999999999);
             } while (User::where('slug', $slug)->exists());
+            function randomAlphaNum($length = 4)
+            {
+                return substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, $length);
+            }
+
+            $username = '@' . strtolower($request->input('name')) . '_' . randomAlphaNum(4);
+
 
             $user = User::create([
                 'name'               => $request->input('name'),
+                'username'           => $username,
                 'slug'               => $slug,
                 'email'              => strtolower($request->input('email')),
                 'password'           => Hash::make($request->input('password')),
@@ -67,9 +75,9 @@ class RegisterController extends Controller
             ];
 
             $admins = User::role('admin', 'web')->get();
-            foreach($admins as $admin){
+            foreach ($admins as $admin) {
                 $admin->notify(new RegistrationNotification($notiData));
-                if(config('settings.reverb')  === 'on'){
+                if (config('settings.reverb')  === 'on') {
                     broadcast(new RegistrationNotificationEvent($notiData, $admin->id))->toOthers();
                 }
             }
@@ -95,7 +103,6 @@ class RegisterController extends Controller
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
                 'data' => $data
             ], 200);
-
         } catch (Exception $e) {
             DB::rollBack();
             return Helper::jsonErrorResponse('User registration failed', 500, [$e->getMessage()]);

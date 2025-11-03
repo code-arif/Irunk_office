@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\Frontend\Review\ReviewController;
 use App\Http\Controllers\Api\Frontend\Users\UsersListController;
 use App\Http\Controllers\Api\Frontend\AddTocart\AddToCartController;
 use App\Http\Controllers\Api\Gateway\Stripe\StripeOnBoardingController;
+use App\Http\Controllers\Api\Frontend\FestiveAlbum\FestiveAlbumController;
 
 
 
@@ -95,12 +96,21 @@ Route::middleware(['auth:api'])->controller(ImageController::class)->prefix('aut
     Route::post('/store', 'store');
     Route::get('/delete/{id}', 'destroy');
 });
+Route::middleware(['auth:api'])->controller(FestiveAlbumController::class)->group(function () {
+    Route::post('/create-album', 'addFestiveAlbum');
+    Route::post('/update-album/{id}', 'updateAlbum');
+    Route::get('/my-albums', 'myAlbums');
+    Route::get('/public-albums', 'getPublicAlbums');
+    Route::get('/private-albums', 'getPrivateAlbums');
+    Route::delete('/delete-image/{id}', 'albumImageOrVideoDelete');
+    Route::delete('/delete-album/{id}', 'destroy');
 
+    Route::get('/album-details/{id}', 'albumDetails');
+});
 
 /*
 # Auth Route
 */
-
 Route::group(['middleware' => 'guest:api'], function ($router) {
     //register
     Route::post('register', [RegisterController::class, 'register']);

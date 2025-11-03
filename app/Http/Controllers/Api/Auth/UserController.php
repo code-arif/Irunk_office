@@ -19,7 +19,7 @@ class UserController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->select = ['id', 'name', 'slug', 'bio', 'country', 'sex', 'age', 'email','avatar'];
+        $this->select = ['id', 'name', 'username', 'slug', 'bio', 'country', 'sex', 'age', 'email', 'avatar'];
     }
 
     public function me()
@@ -33,36 +33,36 @@ class UserController extends Controller
         // Convert to array for manipulation
         $data = $user->toArray();
 
-         $data['user_onboarding'] = !empty($user->stripe_account_id);
+        $data['user_onboarding'] = !empty($user->stripe_account_id);
 
 
-          // If user has stripe_account_id, fetch details from Stripe
-    if (!empty($user->stripe_account_id)) {
-        try {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
-            $account = Account::retrieve($user->stripe_account_id);
-            $isActive = ($account->charges_enabled && $account->payouts_enabled && $account->details_submitted);
+        // If user has stripe_account_id, fetch details from Stripe
+        if (!empty($user->stripe_account_id)) {
+            try {
+                Stripe::setApiKey(env('STRIPE_SECRET'));
+                $account = Account::retrieve($user->stripe_account_id);
+                $isActive = ($account->charges_enabled && $account->payouts_enabled && $account->details_submitted);
 
-            // Add account details (pick only what you need)
-            $data['stripe_account'] = [
-                'id'              => $account->id,
-                'stripe_account_activation'=> $isActive,
-                'email'           => $account->email,
-                'type'            => $account->type,
-                'charges_enabled' => $account->charges_enabled,
-                'payouts_enabled' => $account->payouts_enabled,
-                'details_submitted' => $account->details_submitted,
-                'capabilities'    => $account->capabilities,
-                'business_profile' => $account->business_profile,
-                'created'         => $account->created,
+                // Add account details (pick only what you need)
+                $data['stripe_account'] = [
+                    'id'              => $account->id,
+                    'stripe_account_activation' => $isActive,
+                    'email'           => $account->email,
+                    'type'            => $account->type,
+                    'charges_enabled' => $account->charges_enabled,
+                    'payouts_enabled' => $account->payouts_enabled,
+                    'details_submitted' => $account->details_submitted,
+                    'capabilities'    => $account->capabilities,
+                    'business_profile' => $account->business_profile,
+                    'created'         => $account->created,
 
-            ];
-        } catch (\Exception $e) {
-            $data['stripe_account'] = [
-                'error' => $e->getMessage()
-            ];
+                ];
+            } catch (\Exception $e) {
+                $data['stripe_account'] = [
+                    'error' => $e->getMessage()
+                ];
+            }
         }
-    }
 
         // Replace raw ID with its md5 hash
         $data['id'] = md5($user->id);
@@ -90,6 +90,10 @@ class UserController extends Controller
 
         $user = auth('api')->user();
 
+        /** ✅ Username generator: only if user has no username yet OR name changed */
+        if (!$user->username || $user->name !== $validatedData['name']) {
+            $validatedData['username'] = '@' . strtolower($validatedData['name']) . '_' . $this->randomAlphaNum(4);
+        }
         if ($request->hasFile('avatar')) {
             if (!empty($user->avatar)) {
                 Helper::fileDelete(public_path($user->getRawOriginal('avatar')));
@@ -104,6 +108,12 @@ class UserController extends Controller
         $data = User::select($this->select)->find($user->id);
         return Helper::jsonResponse(true, 'Profile updated successfully', 200, $data);
     }
+
+    private function randomAlphaNum($length = 4)
+    {
+        return substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, $length);
+    }
+
 
     public function updateAvatar(Request $request)
     {

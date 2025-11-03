@@ -37,6 +37,7 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'name',
         'last_name',
+        'username',
         'address',
         'email',
         'password',
@@ -151,29 +152,9 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(Profile::class);
     }
 
-    public function posts()
-    {
-        return $this->hasMany(Post::class);
-    }
-
-    public function plan()
-    {
-        return $this->belongsTo(Plan::class);
-    }
-
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
-    }
-
-    public function products()
-    {
-        return $this->hasMany(Product::class);
-    }
-
-    public function addTocart()
-    {
-        return $this->hasMany(AddToCart::class);
     }
 
     // product like
@@ -229,5 +210,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->friends()->orWhere(function ($query) {
             $query->whereIn('friend_id', $this->friendOf()->pluck('user_id'));
         });
+    }
+
+    // Festive Albums relation
+    public function festiveAlbums()
+    {
+        return $this->hasMany(FestiveAlbum::class);
     }
 }
