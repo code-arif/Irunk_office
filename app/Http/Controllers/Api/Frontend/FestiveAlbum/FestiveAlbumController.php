@@ -8,6 +8,7 @@ use App\Models\FestiveAlbumImage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FestiveAlbumsRequest;
 use App\Http\Resources\MyalbumResource;
+use App\Models\Festival;
 
 class FestiveAlbumController extends Controller
 {
@@ -122,6 +123,30 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
+    // Get Festive
+    public function getFestive()
+    {
+        $festives = Festival::where('status', 'active')->get();
+
+        if ($festives->isEmpty()) {
+            return Helper::jsonResponse(false, 'No festive types found.', 404);
+        }
+
+        $festives = $festives->map(function ($festive) {
+            return [
+                'id'            => $festive->id,
+                'festival_name' => $festive->festival_name,
+                'image'         => $festive->image ? url($festive->image) : null,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'code'    => 200,
+            'message' => 'Festive Types',
+            'data'    => $festives,
+        ]);
+    }
     // Public albums
 
     public function getPublicAlbums()

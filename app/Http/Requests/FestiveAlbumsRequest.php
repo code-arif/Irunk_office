@@ -11,7 +11,7 @@ class FestiveAlbumsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -25,18 +25,12 @@ class FestiveAlbumsRequest extends FormRequest
             'favourite_set'   => 'required|string|max:255',
             'favourite_day'   => 'required|string|max:255',
             'festive_date'    => 'required|date',
-            'camp_experience' => 'required|string|max:255',
+            'camp_experience' => 'required|string',
             'unique_moments'  => 'required|string',
             'dairy_entry'     => 'required|string',
             'status'          => 'required|in:public,private',
-            'fest_type'       => 'required|in:upcoming,past',
-
-            // ✅ Festive Album Images (Multiple Uploads)
-            'images'                   => 'nullable|array',
-            'images.*'                 => 'nullable|file|mimes:jpeg,jpg,png,webp,mp4,mov,avi|max:20480',
-
-            // ✅ If frontend sends festive_album_id on update
-            'festive_album_id' => 'sometimes|exists:festive_albums,id',
+            'fest_type'       => 'required|string|max:255',
+            'images.*'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 }

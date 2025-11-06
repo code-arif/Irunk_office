@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('favourite_set');
             $table->string('favourite_day');
-            $table->timestamp('festive_date');
+            $table->timestamp('festive_date')->nullable();
             $table->string('camp_experience');
             $table->text('unique_moments');
             $table->text('dairy_entry');

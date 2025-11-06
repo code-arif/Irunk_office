@@ -49,6 +49,7 @@ use App\Http\Controllers\Web\Backend\CMS\Web\HowitWorks\SafelyShopController;
 use App\Http\Controllers\Web\Backend\ProductUploadsTips\UploadTipsController;
 use App\Http\Controllers\Web\Backend\CMS\Web\HowitWorks\SimpleSellingController;
 use App\Http\Controllers\Web\Backend\CMS\Web\PrivacyTerms\PrivacAndTermsController;
+use App\Http\Controllers\Web\Backend\FestivalController;
 
 Route::get("dashboard", [DashboardController::class, 'index'])->name('dashboard');
 
@@ -111,7 +112,8 @@ Route::controller(ProductBrandController::class)->prefix('brand')->name('brand.'
     Route::get('/status/{id}', 'status')->name('status');
 });
 
-Route::controller(ProductController::class)->prefix('product')->name('product.')->group(function () {
+
+Route::controller(FestivalController::class)->prefix('festival')->name('festival.')->group(function () {
     Route::get('/', 'index')->name('index');
     Route::get('/create', 'create')->name('create');
     Route::post('/store', 'store')->name('store');

@@ -88,8 +88,6 @@ Route::middleware(['auth:api'])->controller(ChatController::class)->prefix('auth
     Route::delete('/delete/chat/messages', 'deleteMessages'); // working
 });
 
-Route::get('/posts', [PostController::class, 'posts']);
-Route::get('/post/show/{post_id}', [PostController::class, 'post']);
 
 Route::middleware(['auth:api'])->controller(ImageController::class)->prefix('auth/post/image')->group(function () {
     Route::get('/', 'index');
@@ -184,8 +182,6 @@ Route::prefix('cms')->name('cms.')->group(function () {
 Route::get('/privacy-policy', [PrivecyPolicyController::class, 'index']);
 
 // dynamic page
-Route::get('dynamic/page', [PageController::class, 'index']);
-Route::get('dynamic/page/show/{slug}', [PageController::class, 'show']);
 Route::post('/subscribe', [SubscriberController::class, 'subscribe']);
 
 Route::controller(UsersListController::class)->group(function () {
@@ -203,19 +199,6 @@ Route::post('/user-review', [ReviewController::class, 'userReview']);
 Route::get('/own-user-review', [ReviewController::class, 'OwnUserReviews']);
 Route::get('/related-review', [ReviewController::class, 'showUserExistingReview']);
 
+// Festival 
 
-
-Route::controller(AddToCartController::class)->group(function () {
-    Route::post('/add-to-cart', 'addToCart');
-    Route::get('/show-add-to-cart', 'shoAllAddtoCart');
-    Route::post('/add-to-cart-increment', 'cartItemIncrement');
-    Route::post('/add-to-cart-decrement', 'cartItemDecrement');
-    Route::delete('/remove-cartitem', 'deleteItem');
-    Route::delete('/empty-cart', 'emptyCart');
-});
-
-// Manually refresh onboarding
-Route::get('/account/refresh/{account_id}', [StripeOnBoardingController::class, 'accountRefresh']);
-
-// Express login link
-Route::get('/account/login-link', [StripeOnBoardingController::class, 'createLoginLink']);
+Route::get('/festive', [FestiveAlbumController::class, 'getFestive']);
