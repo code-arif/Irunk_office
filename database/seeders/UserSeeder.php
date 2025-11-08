@@ -48,9 +48,9 @@ class UserSeeder extends Seeder
             ]);
 
             DB::table('users')->insert([
-                ['id' => 2, 'name' => 'Admin', 'slug' => 'admin', 'email' => 'admin@admin.com', 'password' => Hash::make('12345678'), 'stripe_account_id' => 'acct_1RHGjbQPESrwz7hv', 'otp_verified_at' => now()],
-                ['id' => 4, 'name' => 'User', 'slug' => 'user', 'email' => 'user@user.com', 'password' => Hash::make('12345678'), 'stripe_account_id' => 'acct_1RHGjbQPESrwz7hv', 'otp_verified_at' => now()],
-                ['id' => 5, 'name' => 'Artist', 'slug' => 'artist', 'email' => 'artist@artist.com', 'password' => Hash::make('12345678'), 'stripe_account_id' => 'acct_1RHGjbQPESrwz7hv', 'otp_verified_at' => now()]
+                ['id' => 2, 'name' => 'Admin','username'=>'@admin', 'slug' => 'admin', 'email' => 'admin@admin.com', 'password' => Hash::make('12345678'), 'stripe_account_id' => 'acct_1RHGjbQPESrwz7hv', 'otp_verified_at' => now()],
+                ['id' => 4, 'name' => 'User', 'username'=>'@user', 'slug' => 'user', 'email' => 'user@user.com', 'password' => Hash::make('12345678'), 'stripe_account_id' => 'acct_1RHGjbQPESrwz7hv', 'otp_verified_at' => now()],
+                ['id' => 5, 'name' => 'Artist', 'username'=>'@artist', 'slug' => 'artist', 'email' => 'artist@artist.com', 'password' => Hash::make('12345678'), 'stripe_account_id' => 'acct_1RHGjbQPESrwz7hv', 'otp_verified_at' => now()]
             ]);
 
             DB::table('profiles')->insert([
