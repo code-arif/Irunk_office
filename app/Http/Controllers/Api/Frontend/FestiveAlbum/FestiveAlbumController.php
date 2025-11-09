@@ -206,6 +206,29 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
+    // get all albums
+    public function allAlbums()
+    {
+        $user = auth('api')->user();
+        if (! $user) {
+            return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
+        }
+
+        $albums = Artist::with(['festival', 'experiences', 'documents'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($albums->isEmpty()) {
+            return Helper::jsonResponse(false, 'No albums found.', 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'code'    => 200,
+            'message' => 'My Festive Albums',
+            'data'    => MyalbumResource::collection($albums), // ✅ collection fix
+        ]);
+    }
 
     // get my albums
     public function myAlbums()
@@ -333,9 +356,8 @@ class FestiveAlbumController extends Controller
             return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
         }
 
-        $album = FestiveAlbum::where('id', $id)
-            ->where('user_id', $user->id)
-            ->with('festiveAlbumImages') // make sure relation is correct
+        $album = Artist::where('id', $id)
+            ->with(['festival', 'experiences', 'documents'])
             ->first();
 
         if (! $album) {

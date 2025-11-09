@@ -99,7 +99,6 @@ class RegisterController extends Controller
                 'message'    => 'User register in successfully.',
                 'code'       => 200,
                 'token_type' => 'bearer',
-                'token'      => $token,
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
                 'data' => $data
             ], 200);

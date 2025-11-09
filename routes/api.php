@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\Frontend\SubcategoryController;
 use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
 use App\Http\Controllers\Api\Frontend\Review\ReviewController;
 use App\Http\Controllers\Api\Frontend\Users\UsersListController;
+use App\Http\Controllers\Api\Frontend\Wishlist\WishlistController;
 use App\Http\Controllers\Api\Frontend\AddTocart\AddToCartController;
 use App\Http\Controllers\Api\Gateway\Stripe\StripeOnBoardingController;
 use App\Http\Controllers\Api\Frontend\FestiveAlbum\FestiveAlbumController;
@@ -97,6 +98,7 @@ Route::middleware(['auth:api'])->controller(ImageController::class)->prefix('aut
 Route::middleware(['auth:api'])->controller(FestiveAlbumController::class)->group(function () {
     Route::post('/create-album', 'store');
     Route::post('/update-album/{id}', 'update');
+    Route::get('/all-albums', 'allAlbums');
     Route::get('/my-albums', 'myAlbums');
     Route::get('/public-albums', 'getPublicAlbums');
     Route::get('/private-albums', 'getPrivateAlbums');
@@ -106,6 +108,12 @@ Route::middleware(['auth:api'])->controller(FestiveAlbumController::class)->grou
     Route::get('/album-details/{id}', 'albumDetails');
 
     Route::get('/festival', 'getFestive');
+});
+
+// wishlist
+Route::middleware(['auth:api'])->controller(WishlistController::class)->group(function () {
+    Route::post('/wishlist/{artist_id}', 'wishlist');
+    Route::get('/get-wishlist', 'getWishlistItems');
 });
 
 /*
