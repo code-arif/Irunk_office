@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class FestiveAlbumsRequest extends FormRequest
+class FestiveUpdateAlbumsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,20 +19,20 @@ class FestiveAlbumsRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-   public function rules(): array
+    public function rules(): array
     {
         return [
-             'festival_name' => 'required|string',
+             'festival_name' => 'nullable|string',
             // artist table
             'name' => 'nullable|string|max:255',
             'image' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:2048',
 
             // festive_experiences table
-            'favourite_set' => 'required|string|max:255',
-            'favourite_day' => 'required|string|max:255',
-            'camp_experience' => 'required|string|max:255',
-            'festive_story' => 'required|string',
-            'festive_date' => 'required|date',
+            'favourite_set' => 'nullable|string|max:255',
+            'favourite_day' => 'nullable|string|max:255',
+            'camp_experience' => 'nullable|string|max:255',
+            'festive_story' => 'nullable|string',
+            'festive_date' => 'nullable|date',
             'status' => 'nullable|in:public,private',
             'fest_type' => 'nullable|string',
 
@@ -45,12 +45,12 @@ class FestiveAlbumsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.required' => 'Artist image is required.',
-            'favourite_set.required' => 'The favourite set field is required.',
-            'favourite_day.required' => 'The favourite day field is required.',
-            'camp_experience.required' => 'The camp experience field is required.',
-            'festive_story.required' => 'The festive story field is required.',
-            'festive_date.required' => 'The festive date field is required.',
+            'image.nullable' => 'Artist image is required.',
+            'favourite_set.nullable' => 'The favourite set field is required.',
+            'favourite_day.nullable' => 'The favourite day field is required.',
+            'camp_experience.nullable' => 'The camp experience field is required.',
+            'festive_story.nullable' => 'The festive story field is required.',
+            'festive_date.nullable' => 'The festive date field is required.',
         ];
     }
 }

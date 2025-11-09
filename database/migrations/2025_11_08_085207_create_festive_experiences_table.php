@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('festive_albums', function (Blueprint $table) {
+        Schema::create('festive_experiences', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('artist_id')->constrained('artists')->onDelete('cascade');
             $table->string('favourite_set');
             $table->string('favourite_day');
-            $table->timestamp('festive_date')->nullable();
             $table->string('camp_experience');
-            $table->text('unique_moments');
-            $table->text('dairy_entry');
-            $table->enum('status',['public','private'])->default('private');
-            $table->enum('fest_type',['upcoming','past'])->default('upcoming');
+            $table->string('festive_story');
+            $table->date('festive_date');
+            $table->enum('status', ['public', 'private'])->default('public');
+            $table->string('fest_type')->default('previous');
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('festive_albums');
+        Schema::dropIfExists('festive_experiences');
     }
 };

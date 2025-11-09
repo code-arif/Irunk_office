@@ -14,31 +14,32 @@ class MyalbumResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+   public function toArray($request)
     {
+        // Get the first experience or null
+        $experience = $this->experiences->first();
+
         return [
-            'id'              => $this->id,
-            'user_id'         => $this->user_id,
-            'name'       => $this->user ? $this->user->name : null,
-            'username'   => $this->user ? $this->user->username : null,
-            'avatar'     => $this->user && $this->user->avatar ? asset($this->user->avatar) : asset('default/profile.jpg'),
-            'favourite_set'   => $this->favourite_set,
-            'favourite_day'   => $this->favourite_day,
-            'festive_date'    => $this->festive_date,
-            'camp_experience' => $this->camp_experience,
-            'unique_moments'  => $this->unique_moments,
-            'dairy_entry'     => $this->dairy_entry,
-            'status'          => $this->status,
-            'fest_type'       => $this->fest_type,
-
-            // ✅ Include related images/videos
-            'images' => $this->festiveAlbumImages ? $this->festiveAlbumImages->map(function ($image) {
+            'id'            => $this->id,
+            'festival_name' => $this->festival ? $this->festival->festival_name : null,
+            'artist_image'  => url($this->image),
+            'experience'    => $experience ? [
+                'id'              => $experience->id,
+                'favourite_set'   => $experience->favourite_set,
+                'favourite_day'   => $experience->favourite_day,
+                'camp_experience' => $experience->camp_experience,
+                'festive_story'   => $experience->festive_story,
+                'festive_date'    => $experience->festive_date,
+                'status'          => $experience->status,
+                'fest_type'       => $experience->fest_type,
+                'details'         => $experience->details,
+            ] : null, // null if no experience
+            'documents'     => $this->documents->map(function($doc) {
                 return [
-                    'id'       => $image->id,
-                    'full_url' => asset($image->image_or_video_path),
+                    'id'       => $doc->id,
+                    'file_url' => url($doc->video_image) ?? null,
                 ];
-            }) : [],
-
+            }),
         ];
     }
 

@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('artists', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('festival_album_id')->constrained('festive_albums')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('festival_id')->constrained('festivals')->onDelete('cascade');
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('festival');
+            $table->string('name')->nullable();
             $table->string('image');
             $table->timestamps();
         });
