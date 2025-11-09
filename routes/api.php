@@ -100,7 +100,7 @@ Route::middleware(['auth:api'])->controller(FestiveAlbumController::class)->grou
     Route::get('/my-albums', 'myAlbums');
     Route::get('/public-albums', 'getPublicAlbums');
     Route::get('/private-albums', 'getPrivateAlbums');
-    Route::delete('/delete-image/{id}', 'albumImageOrVideoDelete');
+    Route::delete('/delete-image/{id}', 'deleteDocuments');
     Route::delete('/delete-album/{id}', 'destroy');
 
     Route::get('/album-details/{id}', 'albumDetails');

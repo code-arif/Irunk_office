@@ -379,7 +379,7 @@ class FestiveAlbumController extends Controller
         return response()->json([
             'success' => true,
             'code'    => 200,
-            'message' => 'Image/Video deleted successfully',
+            'message' => 'Image or Video deleted successfully',
         ]);
     }
 
