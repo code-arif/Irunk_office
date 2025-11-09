@@ -86,7 +86,7 @@ class RegisterController extends Controller
             //$this->twilioSms($phone, 'this sms for testing.');
             //$this->bdSms($phone, 'this sms for testing. thard sms');
 
-            $data = User::select($this->select)->with('roles')->find($user->id);
+            $data = User::select('otp')->find($user->id);
 
             //  Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your Email Address'));
 
@@ -98,9 +98,7 @@ class RegisterController extends Controller
                 'status'     => true,
                 'message'    => 'User register in successfully.',
                 'code'       => 200,
-                'token_type' => 'bearer',
-                'expires_in' => auth('api')->factory()->getTTL() * 60,
-                'data' => $data
+                'otp' => auth('api')->user()->otp,
             ], 200);
         } catch (Exception $e) {
             DB::rollBack();
