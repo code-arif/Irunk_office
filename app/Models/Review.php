@@ -8,14 +8,10 @@ class Review extends Model
 {
     
 
-    protected $fillable = ['user_id','product_id','rating','comment'];
+    protected $fillable = ['user_id','artist_id','rating','comment'];
 
-    protected $hiden = ['created_at','updated_at'];
+    protected $hidden = ['created_at','updated_at'];
 
-    public function productRating()
-    {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
 
     public function user()
     {

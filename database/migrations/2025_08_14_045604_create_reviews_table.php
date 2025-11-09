@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('artist_id')->constrained('artists')->onDelete('cascade');
             $table->decimal('rating');
             $table->enum('status',['active','inactive'])->default('active');
             $table->longText('comment')->nullable();

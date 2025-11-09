@@ -357,7 +357,7 @@ class FestiveAlbumController extends Controller
         }
 
         $album = Artist::where('id', $id)
-            ->with(['festival', 'experiences', 'documents'])
+            ->with(['festival', 'experiences', 'documents','review.user'])
             ->first();
 
         if (! $album) {

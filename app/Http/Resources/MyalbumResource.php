@@ -14,15 +14,21 @@ class MyalbumResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-   public function toArray($request)
+    public function toArray($request)
     {
         // Get the first experience or null
         $experience = $this->experiences->first();
+        $averageRating = $this->review->avg('rating');
 
         return [
             'id'            => $this->id,
             'festival_name' => $this->festival ? $this->festival->festival_name : null,
             'artist_image'  => url($this->image),
+            'average_rating' => $averageRating ? round($averageRating, 2) : null,
+            'published_at' => $this->created_at
+                ? $this->created_at->format('jS F g:i A')
+                : null,
+
             'experience'    => $experience ? [
                 'id'              => $experience->id,
                 'favourite_set'   => $experience->favourite_set,
@@ -34,14 +40,23 @@ class MyalbumResource extends JsonResource
                 'fest_type'       => $experience->fest_type,
                 'details'         => $experience->details,
             ] : null, // null if no experience
-            'documents'     => $this->documents->map(function($doc) {
+            'documents'     => $this->documents->map(function ($doc) {
                 return [
                     'id'       => $doc->id,
                     'file_url' => url($doc->video_image) ?? null,
                 ];
             }),
+            'reviews'       => $this->review->map(function ($rev) {
+
+                return [
+                    'id'        => $rev->id,
+                    'user_name' => $rev->user ? $rev->user->name : 'Anonymous',
+                    'avatar'    => $rev->user ? url($rev->user->avatar) : null,
+                    'rating'    => $rev->rating,
+                    'comment'   => $rev->comment,
+
+                ];
+            }),
         ];
     }
-
-   
 }

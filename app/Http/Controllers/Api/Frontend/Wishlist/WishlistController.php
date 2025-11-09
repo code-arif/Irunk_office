@@ -18,8 +18,8 @@ class WishlistController extends Controller
             return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
         }
 
-        $artist = Artist::where('id', $artist_id)->where('user_id', $user->id)->first();
-        
+        $artist = Artist::where('id', $artist_id)->first();
+
         if($artist && $artist->user_id == $user->id){
             return Helper::jsonResponse(false, 'You cannot add your own artist to wishlist.', 403);
         }

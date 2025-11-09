@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Frontend\Review;
 
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Artist;
 use App\Models\Review;
 use App\Models\Product;
 use App\Models\OrderItem;
@@ -25,7 +26,7 @@ class ReviewController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'product_id' => 'required|exists:products,id',
+            'artist_id' => 'required|exists:artists,id',
             'rating'   => 'required|string|min:1|max:5',
             'comment'  => 'nullable|string|max:1000'
 
@@ -39,41 +40,28 @@ class ReviewController extends Controller
             ], 404);
         }
 
-        $product = Product::where('id', $request->product_id)->first();
+        $artist = Artist::where('id', $request->artist_id)->first();
 
-        if ($product->user_id === $user->id) {
+        if ($artist->user_id === $user->id) {
             return response()->json([
                 'status'   => false,
-                'message'  => 'You could not review your own product!'
+                'message'  => 'You could not review your own album!'
             ], 402);
         }
 
-        $hasPurchased = Order::where('buyer_id', $user->id)
-            ->whereHas('orderItems', function ($query) use ($request, $product) {
-                $query->where('product_id', $request->product_id)
-                    ->where('seller_id', $product->user_id);
-            })->exists();
-
-        if (! $hasPurchased) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'You can only review a product you have purchased.',
-            ], 403);
-        }
-
-        $review = Review::where('product_id', $request->product_id)->where('user_id', $user->id)->first();
+        $review = Review::where('artist_id', $request->artist_id)->where('user_id', $user->id)->first();
 
         if ($review) {
             return response()->json([
                 'status'    => false,
-                'message'   => 'You already reviews this product.'
+                'message'   => 'You already reviews this album.'
             ], 404);
         }
 
 
 
         $review = Review::create([
-            'product_id'  => $product->id,
+            'artist_id'  => $request->artist_id,
             'user_id'     => $user->id,
             'rating'      => $request->rating,
             'comment'     => $request->comment ?? ''
