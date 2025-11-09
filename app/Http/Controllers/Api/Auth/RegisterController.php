@@ -136,7 +136,14 @@ class RegisterController extends Controller
             $user->otp_expires_at    = null;
             $user->save();
 
-            return Helper::jsonResponse(true, 'Email verification successful.', 200);
+             $token = auth('api')->login($user);
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Email verified successfully.',
+                'code'    => 200,
+                'token'   => $token
+            ], 200);
         } catch (Exception $e) {
             return Helper::jsonErrorResponse($e->getMessage(), $e->getCode());
         }
