@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers\Api\Frontend\Review;
 
-use App\Models\User;
-use App\Models\Order;
 use App\Models\Artist;
 use App\Models\Review;
-use App\Models\Product;
-use App\Models\OrderItem;
-use App\Models\UserReview;
+use App\Models\ReviewLike;
+use App\Models\CommentLike;
 use Illuminate\Http\Request;
+use App\Models\ReviewComment;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -33,11 +31,7 @@ class ReviewController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Validation failed',
-                'error'   => $validator->errors()
-            ], 404);
+            return response()->json(['status'  => false, 'message' => 'Validation failed', 'error'   => $validator->errors()], 404);
         }
 
         $artist = Artist::where('id', $request->artist_id)->first();
@@ -76,350 +70,79 @@ class ReviewController extends Controller
     }
 
 
-    // show existing review
-    public function showExistingReview($slug)
+    // Review comment
+
+    public function commentOnReview(Request $request)
     {
-        $authUser = auth()->guard('api')->user();
+        $user = auth()->guard('api')->user();
 
-        if (!$authUser) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
-        // Find the user whose reviews we want to show
-        $targetUser = User::where('slug', $slug)->first();
-
-        if (!$targetUser) {
-            return response()->json([
-                'status'          => false,
-                'message'         => 'User not found.',
-                'data'            => [],
-                'average_rating'  => 0,
-                'total_reviews'   => 0,
-            ], 404);
-        }
-
-        // Get all product IDs for the target user
-        $productIds = Product::where('user_id', $targetUser->id)->pluck('id');
-
-        if ($productIds->isEmpty()) {
-            return response()->json([
-                'status'          => false,
-                'message'         => 'No products found for this user.',
-                'data'            => [],
-                'average_rating'  => 0,
-                'total_reviews'   => 0,
-            ]);
-        }
-
-        // Pagination size (you can set default or allow query param)
-        $perPage = $request->per_page ?? 10;
-
-        // Fetch paginated reviews with reviewer info
-        $reviews = Review::whereIn('product_id', $productIds)
-            ->with('user:id,name,avatar')
-            ->latest()
-            ->paginate($perPage);
-
-        // Calculate average rating and total reviews (from all, not just paginated)
-        $allReviews = Review::whereIn('product_id', $productIds)->get();
-        $averageRating = $allReviews->avg('rating') ?? 0;
-        $totalReviews  = $allReviews->count();
-
-        // Format paginated data
-        $reviewData = $reviews->map(function ($review) {
-            return [
-                'user_name'   => optional($review->user)->name,
-                'user_avatar' => $review->user && $review->user->avatar
-                    ? asset($review->user->avatar)
-                    : null,
-                'rating'      => $review->rating,
-                'comment'     => $review->comment,
-            ];
-        });
-
-        return response()->json([
-            'status'          => true,
-            'message'         => 'User’s product reviews fetched successfully.',
-            'data'            => $reviewData,
-            'total_reviews'   => $totalReviews,
-            'average_rating'  => round($averageRating, 2),
-            'current_page'    => $reviews->currentPage(),
-            'current_page'    => $reviews->currentPage(),
-            'next_page_url'   => $reviews->nextPageUrl(),
-            'last_page'       => $reviews->lastPage(),
-            'per_page'        => $reviews->perPage(),
-            'total'           => $reviews->total(),
-
+        $request->validate([
+            'review_id' => 'required|exists:reviews,id',
+            'comment'   => 'required|string|max:1000',
+            'parent_id' => 'nullable|exists:review_comments,id'
         ]);
-    }
 
+        $review = Review::find($request->review_id);
 
-    // my products review  
-
-    public function ownProductsReview(Request $request)
-    {
-        $authUser = auth()->guard('api')->user();
-
-        if (!$authUser) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
-        // Get all product IDs owned by the user
-        $productIds = Product::where('user_id', $authUser->id)->pluck('id');
-
-        // Fetch reviews for those products with pagination and reviewer info
-        $reviews = Review::whereIn('product_id', $productIds)
-            ->with(['user:id,name,avatar']) // load reviewer info
-            ->latest()
-            ->paginate($request->get('per_page', 10)); // default 10 per page
-
-        if ($reviews->isEmpty()) {
+        // Owner cannot comment on own review (but can reply)
+        if ($review->user_id === $user->id && !$request->parent_id) {
             return response()->json([
                 'status' => false,
-                'message' => 'No reviews found!',
-                'code'   => 404
-            ]);
-        }
-
-        // Format reviews
-        $reviewData = $reviews->map(function ($review) {
-            return [
-                'user_name'   => optional($review->user)->name,
-                'user_avatar' => $review->user && $review->user->avatar
-                    ? asset($review->user->avatar)
-                    : null,
-                'rating'      => $review->rating,
-                'comment'     => $review->comment,
-                'created_at'  => $review->created_at->format('jS M, Y'),
-            ];
-        });
-
-        return response()->json([
-            'status'          => true,
-            'message'         => 'Reviews fetched successfully',
-            'reviews'         => $reviewData,
-            'current_page'    => $reviews->currentPage(),
-            'next_page_url'   => $reviews->nextPageUrl(),
-            'prev_page_url'   => $reviews->previousPageUrl(),
-            'last_page'       => $reviews->lastPage(),
-            'per_page'        => $reviews->perPage(),
-            'total'           => $reviews->total(),
-        ]);
-    }
-
-
-    // user profile review
-
-    public function userReview(Request $request)
-    {
-        $authUser = auth()->guard('api')->user();
-
-        if (!$authUser) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
-        // Validate request
-        $validator = Validator::make($request->all(), [
-            'seller_slug' => 'required|string|exists:users,slug',
-            'rating'      => 'required|numeric|min:1|max:5',
-            'comment'     => 'nullable|string|max:1000',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Validation failed',
-                'error'   => $validator->errors()
-            ], 422);
-        }
-
-        $validated = $validator->validated();
-
-        // Find seller by slug
-        $seller = User::where('slug', $validated['seller_slug'])->first();
-
-        // Check if user has purchased any item from this seller
-        $hasBought = OrderItem::where('seller_id', $seller->id)
-            ->whereHas('order', function ($query) use ($authUser) {
-                $query->where('buyer_id', $authUser->id);
-            })
-            ->exists();
-
-        if (!$hasBought) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'You cannot review this seller because you have not purchased any product from them.',
+                'message' => 'You cannot comment on your own review!'
             ], 403);
         }
 
-        // Check if user already reviewed this seller
-        $alreadyReviewed = UserReview::where('buyer_id', $authUser->id)
-            ->where('seller_id', $seller->id)
-            ->exists();
-
-        if ($alreadyReviewed) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'You have already reviewed this seller.',
-            ], 403);
-        }
-
-        // Save the review
-        $review = UserReview::create([
-            'buyer_id'  => $authUser->id,
-            'seller_id' => $seller->id,
-            'rating'    => $validated['rating'],
-            'comment'   => $validated['comment'] ?? null,
+        $comment = ReviewComment::create([
+            'review_id' => $review->id,
+            'user_id'   => $user->id,
+            'comment'   => $request->comment,
+            'parent_id' => $request->parent_id
         ]);
 
         return response()->json([
-            'status'  => true,
-            'message' => 'Review submitted successfully.',
-            'data'    => $review,
-        ], 200);
-    }
-
-    // get UserReview
-
-    public function OwnUserReviews(Request $request)
-    {
-        $authUser = auth()->guard('api')->user();
-
-        if (!$authUser) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
-        // Fetch reviews where the authenticated user is the buyer
-        $reviews = UserReview::where('seller_id', $authUser->id)
-            ->with(['seller:id,name,avatar']) // load seller info
-            ->latest()
-            ->paginate($request->get('per_page', 10));
-
-        if ($reviews->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No reviews found!',
-                'code'   => 404
-            ]);
-        }
-
-        // Format reviews
-        $reviewData = $reviews->map(function ($review) {
-            return [
-                'seller_name'   => optional($review->seller)->name,
-                'seller_avatar' => $review->seller && $review->seller->avatar
-                    ? asset($review->seller->avatar)
-                    : null,
-                'rating'        => $review->rating,
-                'comment'       => $review->comment,
-                'created_at'    => $review->created_at->format('jS M, Y'),
-            ];
-        });
-
-        return response()->json([
-            'status'          => true,
-            'message'         => 'Your reviews fetched successfully',
-            'reviews'         => $reviewData,
-            'current_page'    => $reviews->currentPage(),
-            'next_page_url'   => $reviews->nextPageUrl(),
-            'prev_page_url'   => $reviews->previousPageUrl(),
-            'last_page'       => $reviews->lastPage(),
-            'per_page'        => $reviews->perPage(),
-            'total'           => $reviews->total(),
+            'status' => true,
+            'message' => $request->parent_id ? 'Reply added' : 'Comment added',
+            'data' => $comment
         ]);
     }
 
-
-
-    public function showUserExistingReview(Request $request)
+    // Like a review
+    public function likeReview($reviewId)
     {
-        $authUser = auth()->guard('api')->user();
+        $user = auth()->guard('api')->user();
+        $review = Review::findOrFail($reviewId);
 
-        if (!$authUser) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Unauthorized',
-            ], 401);
+        $like = ReviewLike::where('review_id', $reviewId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($like) {
+            $like->delete();
+            return response()->json(['status' => true, 'code' => 200, 'message' => 'Review unliked successfully!']);
         }
 
-        // Get slug from query param
-        $slug = $request->query('slug');
+        ReviewLike::create(['review_id' => $reviewId, 'user_id' => $user->id]);
 
-        if (!$slug) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Slug parameter is required.',
-                'data'    => [],
-                'average_rating' => 0,
-                'total_reviews'  => 0,
-            ], 422);
+        return response()->json(['status' => true, 'code' => 200, 'message' => 'Review liked successfully!']);
+    }
+
+    // Like a comment
+    public function likeComment($commentId)
+    {
+        $user = auth()->guard('api')->user();
+        $comment = ReviewComment::findOrFail($commentId);
+
+        $like = CommentLike::where('comment_id', $commentId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($like) {
+            $like->delete();
+            return response()->json(['status' => true, 'code' => 200, 'message' => 'Comment unliked successfully!']);
         }
 
-        // Find seller by slug
-        $seller = User::where('slug', $slug)->first();
+        CommentLike::create(['comment_id' => $commentId, 'user_id' => $user->id]);
 
-        if (!$seller) {
-            return response()->json([
-                'status'          => false,
-                'message'         => 'User not found.',
-                'data'            => [],
-                'average_rating'  => 0,
-                'total_reviews'   => 0,
-            ], 404);
-        }
-
-        // Pagination (default 10 per page)
-        $perPage = $request->get('per_page', 10);
-
-        // Fetch reviews for this seller
-        $reviews = UserReview::where('seller_id', $seller->id)
-            ->with('buyer:id,name,avatar')
-            ->latest()
-            ->paginate($perPage);
-
-        // Calculate average rating and total reviews
-        $averageRating = UserReview::where('seller_id', $seller->id)->avg('rating') ?? 0;
-        $totalReviews  = UserReview::where('seller_id', $seller->id)->count();
-
-        // Transform paginated reviews
-        $reviewData = $reviews->getCollection()->map(function ($review) {
-            return [
-                'buyer_name'   => optional($review->buyer)->name,
-                'buyer_avatar' => $review->buyer && $review->buyer->avatar
-                    ? asset($review->buyer->avatar)
-                    : null,
-                'rating'       => $review->rating,
-                'comment'      => $review->comment,
-                'created_at'   => $review->created_at->format('jS M, Y'),
-            ];
-        });
-
-        // Replace collection with transformed data
-        $reviews->setCollection($reviewData);
-
-        return response()->json([
-            'status'          => true,
-            'message'         => 'Seller reviews fetched successfully.',
-            'data'            => $reviews->items(),
-            'total_reviews'   => $totalReviews,
-            'average_rating'  => round($averageRating, 2),
-            'current_page'    => $reviews->currentPage(),
-            'next_page_url'   => $reviews->nextPageUrl(),
-            'last_page'       => $reviews->lastPage(),
-            'per_page'        => $reviews->perPage(),
-            'total'           => $reviews->total(),
-        ]);
+        return response()->json(['status' => true, 'code' => 200, 'message' => 'Comment liked successfully!']);
     }
 }

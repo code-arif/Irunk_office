@@ -46,17 +46,39 @@ class MyalbumResource extends JsonResource
                     'file_url' => url($doc->video_image) ?? null,
                 ];
             }),
-            'reviews'       => $this->review->map(function ($rev) {
-
+            'reviews' => $this->review->map(function ($rev) {
                 return [
                     'id'        => $rev->id,
                     'user_name' => $rev->user ? $rev->user->name : 'Anonymous',
                     'avatar'    => $rev->user ? url($rev->user->avatar) : null,
                     'rating'    => $rev->rating,
                     'comment'   => $rev->comment,
-
+                    'like_count' => $rev->likes()->count(),
+                    // Add comments if exist
+                    'comments'  => $rev->comments->map(function ($comment) {
+                        return [
+                            'id'         => $comment->id,
+                            'user_name'  => $comment->user ? $comment->user->name : 'Anonymous',
+                            'avatar'     => $comment->user ? url($comment->user->avatar) : null,
+                            'comment'    => $comment->comment,
+                            'parent_id'  => $comment->parent_id,
+                            'likes_count' => $comment->likes()->count(),
+                            'replies'    => $comment->replies->map(function ($reply) {
+                                return [
+                                    'id'         => $reply->id,
+                                    'user_name'  => $reply->user ? $reply->user->name : 'Anonymous',
+                                    'avatar'     => $reply->user ? url($reply->user->avatar) : null,
+                                    'comment'    => $reply->comment,
+                                    'parent_id'  => $reply->parent_id,
+                                    // 'likes_count' => $reply->likes()->count(),
+                                ];
+                            }),
+                        ];
+                    }),
                 ];
             }),
+
+
         ];
     }
 }

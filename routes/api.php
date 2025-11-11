@@ -200,14 +200,15 @@ Route::controller(UsersListController::class)->group(function () {
 });
 
 
-Route::post('/review', [ReviewController::class, 'review']);
-Route::get('/get-own-review', [ReviewController::class, 'ownProductsreview']);
-Route::get('/get-review/{slug}', [ReviewController::class, 'showExistingReview']);
+Route::middleware(['auth:api'])->controller(ReviewController::class)->group(function () {
+    Route::post('/review', 'review');
+    Route::post('/review-comment', 'commentOnReview');
 
-// user review
-Route::post('/user-review', [ReviewController::class, 'userReview']);
-Route::get('/own-user-review', [ReviewController::class, 'OwnUserReviews']);
-Route::get('/related-review', [ReviewController::class, 'showUserExistingReview']);
+    Route::post('/review-like/{reviewId}', 'likeReview');
+    Route::post('/comment-like/{commentId}', 'likeComment');
+});
+
+
 
 // Festival 
 

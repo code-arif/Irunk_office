@@ -214,7 +214,7 @@ class FestiveAlbumController extends Controller
             return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
         }
 
-        $albums = Artist::with(['festival', 'experiences', 'documents'])
+        $albums = Artist::with(['festival', 'experiences', 'documents'])->where('user_id','!=' , $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -357,7 +357,7 @@ class FestiveAlbumController extends Controller
         }
 
         $album = Artist::where('id', $id)
-            ->with(['festival', 'experiences', 'documents','review.user'])
+            ->with(['festival', 'experiences', 'documents','review.user','review.comments','review.likes'])
             ->first();
 
         if (! $album) {
