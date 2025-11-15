@@ -13,11 +13,26 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('artist_id')->constrained('artists')->onDelete('cascade');
-            $table->decimal('rating');
-            $table->enum('status',['active','inactive'])->default('active');
+
+            // User foreign key
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')
+                  ->references('id')
+                  ->on('users')
+                  ->onDelete('cascade');
+
+            // Artist foreign key
+            $table->unsignedBigInteger('artist_id');
+            $table->foreign('artist_id')
+                  ->references('id')
+                  ->on('artists')
+                  ->onDelete('cascade');
+
+            // Other fields
+            $table->decimal('rating', 3, 2); // e.g., 4.50
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->longText('comment')->nullable();
+
             $table->timestamps();
         });
     }
