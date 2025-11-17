@@ -23,6 +23,7 @@ class MyalbumResource extends JsonResource
         return [
             'id'            => $this->id,
             'festival_name' => $this->festival ? $this->festival->festival_name : null,
+            'total_review' => $this->review ? $this->review->count() : 0,
             'artist_image'  => url($this->image),
             'average_rating' => $averageRating ? round($averageRating, 2) : null,
             'published_at' => $this->created_at
