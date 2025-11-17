@@ -215,7 +215,7 @@ class FestiveAlbumController extends Controller
             return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
         }
 
-        $albums = Artist::with(['festival', 'experiences', 'documents'])->where('user_id','!=' , $user->id)
+        $albums = Artist::with(['festival', 'experiences', 'documents'])->where('user_id', '!=', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -360,6 +360,27 @@ class FestiveAlbumController extends Controller
         $album = Artist::where('id', $id)
             ->with(['festival', 'experiences', 'documents','review.user','review.comments','review.likes'])
             ->first();
+        // $album = Artist::where('id', $id)
+        //     ->with([
+        //         'festival',
+        //         'experiences',
+        //         'documents',
+
+        //         'review.user',
+        //         'review.likes',
+
+        //         'review.comments.user',
+        //         'review.comments.likes',
+
+        //         // Load replies recursively
+        //         'review.comments.replies.user',
+        //         'review.comments.replies.likes',
+        //         'review.comments.replies.replies', // recursive load
+        //         'review.comments.replies.replies.user',
+        //         'review.comments.replies.replies.likes'
+        //     ])
+        //     ->first();
+
 
         if (! $album) {
             return Helper::jsonResponse(false, 'Album not found.', 404);
@@ -424,7 +445,7 @@ class FestiveAlbumController extends Controller
                 if (!empty($document->video_image) && file_exists(public_path($document->video_image))) {
                     unlink(public_path($document->video_image));
                 }
-                $document->delete(); 
+                $document->delete();
             }
         }
         $album->delete();

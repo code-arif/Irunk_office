@@ -16,10 +16,17 @@ class ReviewComment extends Model
         return $this->belongsTo(User::class);
     }
 
+    // public function replies()
+    // {
+    //     return $this->hasMany(ReviewComment::class, 'parent_id')->with('replies', 'user');;
+    // }
+
     public function replies()
     {
-        return $this->hasMany(ReviewComment::class, 'parent_id');
+        return $this->hasMany(ReviewComment::class, 'parent_id')
+            ->with('replies', 'user', 'likes');
     }
+
 
     public function parent()
     {

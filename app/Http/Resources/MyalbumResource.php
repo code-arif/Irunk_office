@@ -71,7 +71,7 @@ class MyalbumResource extends JsonResource
                                     'avatar'     => $reply->user ? url($reply->user->avatar) : null,
                                     'comment'    => $reply->comment,
                                     'parent_id'  => $reply->parent_id,
-                                    // 'likes_count' => $reply->likes()->count(),
+                                    'likes_count' => $reply->likes()->count(),
                                 ];
                             }),
                         ];
