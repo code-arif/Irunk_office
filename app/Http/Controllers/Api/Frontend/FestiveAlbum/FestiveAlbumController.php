@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\MyalbumResource;
 use App\Http\Requests\FestiveAlbumsRequest;
 use App\Http\Requests\FestiveUpdateAlbumsRequest;
+use App\Http\Resources\AllAlbumResource;
 
 class FestiveAlbumController extends Controller
 {
@@ -225,8 +226,8 @@ class FestiveAlbumController extends Controller
         return response()->json([
             'success' => true,
             'code'    => 200,
-            'message' => 'My Festive Albums',
-            'data'    => MyalbumResource::collection($albums), // ✅ collection fix
+            'message' => 'All Festive Albums',
+            'data'    => AllAlbumResource::collection($albums), // ✅ collection fix
         ]);
     }
 
@@ -250,7 +251,7 @@ class FestiveAlbumController extends Controller
             'success' => true,
             'code'    => 200,
             'message' => 'My Festive Albums',
-            'data'    => MyalbumResource::collection($albums), // ✅ collection fix
+            'data'    => AllAlbumResource::collection($albums), // ✅ collection fix
         ]);
     }
 
