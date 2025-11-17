@@ -84,13 +84,13 @@ class ReviewController extends Controller
 
         $review = Review::find($request->review_id);
 
-        // Owner cannot comment on own review (but can reply)
-        if ($review->user_id === $user->id && !$request->parent_id) {
-            return response()->json([
-                'status' => false,
-                'message' => 'You cannot comment on your own review!'
-            ], 403);
-        }
+        // // Owner cannot comment on own review (but can reply)
+        // if ($review->user_id === $user->id && !$request->parent_id) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => 'You cannot comment on your own review!'
+        //     ], 403);
+        // }
 
         $comment = ReviewComment::create([
             'review_id' => $review->id,
