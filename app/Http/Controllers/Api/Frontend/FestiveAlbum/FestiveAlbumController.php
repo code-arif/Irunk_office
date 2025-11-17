@@ -311,7 +311,7 @@ class FestiveAlbumController extends Controller
             'success' => true,
             'code'    => 200,
             'message' => ucfirst($status) . ' Albums',
-            'data'    => MyalbumResource::collection($albums),
+            'data'    => AllAlbumResource::collection($albums),
         ]);
     }
 
@@ -344,7 +344,7 @@ class FestiveAlbumController extends Controller
             'success' => true,
             'code'    => 200,
             'message' => ucfirst($status) . ' Albums',
-            'data'    => MyalbumResource::collection($albums),
+            'data'    => AllAlbumResource::collection($albums),
         ]);
     }
 

@@ -44,10 +44,10 @@ class AllAlbumResource extends JsonResource
             'artist_image'   => url($this->image),
             'average_rating' => $averageRating ? round($averageRating, 2) : null,
             'published_at'   => $this->created_at
-                ? $this->created_at->format('jS F g:i A')
+                ? $this->created_at->format('jS F')
                 : null,
 
-            // 👇 NEW FIELDS
+            // NEW FIELDS
             'total_images' => $totalImages,
             'total_videos' => $totalVideos,
         ];
