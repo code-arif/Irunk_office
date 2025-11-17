@@ -19,10 +19,16 @@ class Review extends Model
     }
 
 
-    public function comments()
-    {
-        return $this->hasMany(ReviewComment::class)->whereNull('parent_id');
-    }
+    // public function comments()
+    // {
+    //     return $this->hasMany(ReviewComment::class)->whereNull('parent_id');
+    // }
+public function comments()
+{
+    return $this->hasMany(ReviewComment::class)
+        ->whereNull('parent_id')
+        ->with(['replies', 'user', 'likes']);
+}
 
 
     public function likes()
