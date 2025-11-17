@@ -118,7 +118,7 @@ class ReviewController extends Controller
 
         if ($like) {
             $like->delete();
-            return response()->json(['status' => true, 'code' => 200, 'message' => 'Review unliked successfully!']);
+            return response()->json(['status' => false, 'code' => 200, 'message' => 'Review unliked successfully!']);
         }
 
         ReviewLike::create(['review_id' => $reviewId, 'user_id' => $user->id]);
@@ -138,7 +138,7 @@ class ReviewController extends Controller
 
         if ($like) {
             $like->delete();
-            return response()->json(['status' => true, 'code' => 200, 'message' => 'Comment unliked successfully!']);
+            return response()->json(['status' => false, 'code' => 200, 'message' => 'Comment unliked successfully!']);
         }
 
         CommentLike::create(['comment_id' => $commentId, 'user_id' => $user->id]);
