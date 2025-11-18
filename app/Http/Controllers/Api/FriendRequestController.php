@@ -24,11 +24,57 @@ class FriendRequestController extends Controller
     /**
      * People you may know function/ get all user randomaize
      */
+    // public function index(Request $request)
+    // {
+    //     $authId = auth()->id();
+
+    //     // already friends list (both sides)
+    //     $friendIds = DB::table('friends')
+    //         ->where('user_id', $authId)
+    //         ->orWhere('friend_id', $authId)
+    //         ->pluck('user_id', 'friend_id')
+    //         ->flatten()
+    //         ->unique()
+    //         ->toArray();
+
+    //     // pending or accepted friend request users
+    //     $requestedIds = DB::table('friend_requests')
+    //         ->where(function ($q) use ($authId) {
+    //             $q->where('sender_id', $authId)
+    //                 ->orWhere('receiver_id', $authId);
+    //         })
+    //         ->pluck('sender_id', 'receiver_id')
+    //         ->flatten()
+    //         ->unique()
+    //         ->toArray();
+
+    //     // merge friend + request IDs
+    //     $blockedIds = array_unique(array_merge($friendIds, $requestedIds, [$authId]));
+
+    //     // get users not in that list
+    //     $users = User::whereNotIn('id', $blockedIds)
+    //         ->inRandomOrder()
+    //         ->limit(10)
+    //         ->get();
+
+    //     if ($users->isEmpty()) {
+    //         return $this->error([], 'No user available to send request.', 404);
+    //     }
+
+    //     // return $this->success($users, 'Users retrieved successfully.', 200);
+    //     return $this->success(
+    //         UserFriendResource::collection($users),
+    //         'Users retrieved successfully.',
+    //         200
+    //     );
+    // }
+
+
     public function index(Request $request)
     {
         $authId = auth()->id();
 
-        // already friends list (both sides)
+        // FRIEND LIST
         $friendIds = DB::table('friends')
             ->where('user_id', $authId)
             ->orWhere('friend_id', $authId)
@@ -37,21 +83,16 @@ class FriendRequestController extends Controller
             ->unique()
             ->toArray();
 
-        // pending or accepted friend request users
-        $requestedIds = DB::table('friend_requests')
-            ->where(function ($q) use ($authId) {
-                $q->where('sender_id', $authId)
-                    ->orWhere('receiver_id', $authId);
-            })
-            ->pluck('sender_id', 'receiver_id')
-            ->flatten()
-            ->unique()
+        // REQUEST LIST
+        $requested = DB::table('friend_requests')
+            ->where('sender_id', $authId)
+            ->pluck('receiver_id')     // only whom I sent
             ->toArray();
 
-        // merge friend + request IDs
-        $blockedIds = array_unique(array_merge($friendIds, $requestedIds, [$authId]));
+        // BLOCK LIST (friend + request + myself)
+        $blockedIds = array_unique(array_merge($friendIds, $requested, [$authId]));
 
-        // get users not in that list
+        // USERS
         $users = User::whereNotIn('id', $blockedIds)
             ->inRandomOrder()
             ->limit(10)
@@ -61,9 +102,10 @@ class FriendRequestController extends Controller
             return $this->error([], 'No user available to send request.', 404);
         }
 
-        // return $this->success($users, 'Users retrieved successfully.', 200);
         return $this->success(
-            UserFriendResource::collection($users),
+            UserFriendResource::collection($users)->additional([
+                'requested_users' => $requested
+            ]),
             'Users retrieved successfully.',
             200
         );
@@ -253,7 +295,7 @@ class FriendRequestController extends Controller
 
         $perPage = $request->get('per_page', 10);
 
-        $requests = FriendRequest::with('sender:id,first_name,last_name,username,avatar')
+        $requests = FriendRequest::with('sender:id,name,avatar')
             ->where('receiver_id', $user->id)
             ->where('status', 'pending')
             ->paginate($perPage);
