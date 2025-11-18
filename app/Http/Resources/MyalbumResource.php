@@ -98,6 +98,10 @@ class MyalbumResource extends JsonResource
                     'comment'   => $rev->comment,
                     'rating'    => $rev->rating,
                     'likes_count' => $rev->likes()->count(),
+                    'user_name'  => $rev->user ? $rev->user->name : 'Anonymous',
+                    'avatar'     => $rev->user && $rev->user->avatar
+                        ? url($rev->user->avatar)
+                        : null,
                     'replies'  => $rev->comments->map(function ($comment) {
                         return $this->formatComment($comment);
                     }),
