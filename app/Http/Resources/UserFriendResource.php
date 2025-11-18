@@ -15,6 +15,7 @@ class UserFriendResource extends JsonResource
             'avatar' => $this->avatar
                 ? url('/' . $this->avatar)
                 : asset('default/profile.jpg'),
+            'is_request' => in_array($this->id, $requestedUsers),
         ];
     }
 }
