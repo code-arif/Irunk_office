@@ -7,8 +7,12 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserFriendResource extends JsonResource
 {
+
+
     public function toArray($request)
     {
+        // requested user IDs from controller
+        $requestedUsers = $this->additional['requested_users'] ?? [];
         return [
             'id'     => $this->id,
             'name'   => $this->name,
