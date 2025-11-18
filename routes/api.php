@@ -63,6 +63,7 @@ Route::middleware(['auth:api'])->controller(PostController::class)->prefix('auth
 
 // Friend request system
 Route::middleware('auth:api')->prefix('/friends')->group(function () {
+    Route::get('/people-you-may-know', [FriendRequestController::class, 'index']);
     Route::post('/send-request', [FriendRequestController::class, 'sendRequest']); // working: send friend request
     Route::post('/cancel-request', [FriendRequestController::class, 'cancelRequest']); // working: cancle friend request
     Route::post('/accept-request', [FriendRequestController::class, 'acceptRequest']); // working: accept friend request
@@ -210,7 +211,7 @@ Route::middleware(['auth:api'])->controller(ReviewController::class)->group(func
 
 
 
-// Festival 
+// Festival
 
 Route::get('/festive', [FestiveAlbumController::class, 'getFestive']);
 

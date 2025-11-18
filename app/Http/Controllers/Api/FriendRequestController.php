@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 
 use Exception;
+use App\Models\User;
 use App\Models\Friend;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
@@ -12,12 +13,62 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\UserFriendResource;
 use App\Http\Resources\FriendRequestResource;
 use App\Http\Resources\FriendRequestCollection;
 
 class FriendRequestController extends Controller
 {
     use ApiResponse;
+
+    /**
+     * People you may know function/ get all user randomaize
+     */
+    public function index(Request $request)
+    {
+        $authId = auth()->id();
+
+        // already friends list (both sides)
+        $friendIds = DB::table('friends')
+            ->where('user_id', $authId)
+            ->orWhere('friend_id', $authId)
+            ->pluck('user_id', 'friend_id')
+            ->flatten()
+            ->unique()
+            ->toArray();
+
+        // pending or accepted friend request users
+        $requestedIds = DB::table('friend_requests')
+            ->where(function ($q) use ($authId) {
+                $q->where('sender_id', $authId)
+                    ->orWhere('receiver_id', $authId);
+            })
+            ->pluck('sender_id', 'receiver_id')
+            ->flatten()
+            ->unique()
+            ->toArray();
+
+        // merge friend + request IDs
+        $blockedIds = array_unique(array_merge($friendIds, $requestedIds, [$authId]));
+
+        // get users not in that list
+        $users = User::whereNotIn('id', $blockedIds)
+            ->inRandomOrder()
+            ->limit(10)
+            ->get();
+
+        if ($users->isEmpty()) {
+            return $this->error([], 'No user available to send request.', 404);
+        }
+
+        // return $this->success($users, 'Users retrieved successfully.', 200);
+        return $this->success(
+            UserFriendResource::collection($users),
+            'Users retrieved successfully.',
+            200
+        );
+    }
+
 
     /**
      * Send a friend request
