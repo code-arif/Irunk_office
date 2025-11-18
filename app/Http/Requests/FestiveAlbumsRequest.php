@@ -29,7 +29,8 @@ class FestiveAlbumsRequest extends FormRequest
 
             // festive_experiences table
             'favourite_set' => 'required|string|max:255',
-            'favourite_day' => 'required|string|max:255',
+            'favourite_day' => 'nullable|string|max:255',
+            'day_type'      => 'nullable|in:single-day,none',
             'camp_experience' => 'required|string|max:255',
             'festive_story' => 'required|string',
             'festive_date' => 'required|date',

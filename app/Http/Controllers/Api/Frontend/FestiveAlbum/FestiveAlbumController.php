@@ -28,6 +28,21 @@ class FestiveAlbumController extends Controller
             ], 401);
         }
 
+
+        // Validate date requirement based on fest_type
+        if ($request->fest_type == 'single-day') {
+            if (!$request->festive_date) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Festive date is required for single-day festivals.'
+                ], 422);
+            }
+        } else {
+            // Auto-set date to NULL for other fest types
+            $request['festive_date'] = null;
+        }
+
+
         // ✅ 1. Find Festival by Name
         $festival = Festival::where('festival_name', 'LIKE', $request->festival_name)->first();
 
@@ -58,6 +73,7 @@ class FestiveAlbumController extends Controller
             'camp_experience' => $request->camp_experience,
             'festive_story' => $request->festive_story,
             'festive_date' => $request->festive_date,
+            'day_type' => $request->day_type ?? 'none',
             'status' => $request->status ?? 'public',
             'fest_type' => $request->fest_type ?? 'previous',
         ]);
@@ -157,6 +173,7 @@ class FestiveAlbumController extends Controller
             $experience->update([
                 'favourite_set'   => $request->favourite_set ?? $experience->favourite_set,
                 'favourite_day'   => $request->favourite_day ?? $experience->favourite_day,
+                'day_type'        => $request->day_type ?? $experience->day_type,
                 'camp_experience' => $request->camp_experience ?? $experience->camp_experience,
                 'festive_story'   => $request->festive_story ?? $experience->festive_story,
                 'festive_date'    => $request->festive_date ?? $experience->festive_date,
@@ -358,10 +375,10 @@ class FestiveAlbumController extends Controller
         }
 
         $album = Artist::where('id', $id)
-            ->with(['festival', 'experiences', 'documents','review.user','review.comments','review.likes','review.comments.replies'])
+            ->with(['festival', 'experiences', 'documents', 'review.user', 'review.comments', 'review.likes', 'review.comments.replies'])
             ->first();
 
-            // dd($album);
+        // dd($album);
         // $album = Artist::where('id', $id)
         //     ->with([
         //         'festival',

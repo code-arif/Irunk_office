@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('camp_experience');
             $table->string('festive_story');
             $table->date('festive_date');
+            $table->enum('day_type', ['single-day', 'none'])->default('none');
             $table->enum('status', ['public', 'private'])->default('public');
             $table->string('fest_type')->default('previous');
             $table->timestamps();
