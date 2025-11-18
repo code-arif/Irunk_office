@@ -116,6 +116,10 @@ class MyalbumResource extends JsonResource
             'comment'    => $comment->comment,
             'parent_id'  => $comment->parent_id,
             'likes_count' => $comment->likes()->count(),
+            'user_name'  => $comment->user ? $comment->user->name : 'Anonymous',
+            'avatar'     => $comment->user && $comment->user->avatar
+                ? url($comment->user->avatar)
+                : null,
             'replies'    => $comment->replies->map(function ($child) {
                 return $this->formatComment($child); // recursive
             }),
