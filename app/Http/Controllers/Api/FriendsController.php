@@ -32,7 +32,7 @@ class FriendsController extends Controller
 
         // users fatch with friendsIds
         $friends = User::whereIn('id', $friendIds)
-            ->select('id', 'name', 'username', 'email', 'phone', 'avatar')
+            ->select('id', 'name', 'username', 'email', 'avatar')
             ->paginate(15);
 
         return $this->success(
