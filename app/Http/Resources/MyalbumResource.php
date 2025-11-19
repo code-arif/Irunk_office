@@ -98,6 +98,10 @@ class MyalbumResource extends JsonResource
                     'comment'   => $rev->comment,
                     'rating'    => $rev->rating,
                     'likes_count' => $rev->likes()->count(),
+                    'user_name'  => $rev->user ? $rev->user->name : 'Anonymous',
+                    'avatar'     => $rev->user && $rev->user->avatar
+                        ? url($rev->user->avatar)
+                        : null,
                     'replies'  => $rev->comments->map(function ($comment) {
                         return $this->formatComment($comment);
                     }),
@@ -116,6 +120,10 @@ class MyalbumResource extends JsonResource
             'comment'    => $comment->comment,
             'parent_id'  => $comment->parent_id,
             'likes_count' => $comment->likes()->count(),
+            'user_name'  => $comment->user ? $comment->user->name : 'Anonymous',
+            'avatar'     => $comment->user && $comment->user->avatar
+                ? url($comment->user->avatar)
+                : null,
             'replies'    => $comment->replies->map(function ($child) {
                 return $this->formatComment($child); // recursive
             }),

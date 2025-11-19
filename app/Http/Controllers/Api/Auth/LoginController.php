@@ -73,6 +73,7 @@ class LoginController extends Controller
                 'message'    => 'Login successful',
                 'code'       => 200,
                 'token_type' => 'bearer',
+                'user_id'    => $user->id,
                 'token'      => $token,
                 'expires_in' => auth('api')->factory()->getTTL() * 60,
                 
