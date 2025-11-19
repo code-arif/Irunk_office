@@ -14,7 +14,6 @@ class FriendListResource extends JsonResource
             'name'      => $this->name,
             // 'username'  => $this->username,
             'email'     => $this->email,
-            'phone'     => $this->phone,
             'avatar' => $this->avatar ? asset($this->avatar) : asset('default/profile.jpg'),
         ];
     }
