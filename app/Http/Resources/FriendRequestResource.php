@@ -9,7 +9,7 @@ class FriendRequestResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $person = $this->receiver ?? $this->sender;
+        $person = $this->receiver;
 
         return [
             'id' => $this->id,
