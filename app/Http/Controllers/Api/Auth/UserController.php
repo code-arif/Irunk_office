@@ -28,49 +28,49 @@ class UserController extends Controller
     }
 
     public function me()
-{
-    $user = User::select($this->select)->find(auth('api')->id());
+    {
+        $user = User::select($this->select)->find(auth('api')->id());
 
-    if (!$user) {
-        return Helper::jsonResponse(false, 'User not found', 404, null);
+        if (!$user) {
+            return Helper::jsonResponse(false, 'User not found', 404, null);
+        }
+
+        // ------------------ Counts ------------------
+        $user->total_albums = $user->artists()->count();
+        $user->total_festables = Festival::count();
+
+        // ------------------ Wishlist ------------------
+        $wishlistArtistIds = DB::table('wishlists')
+            ->where('user_id', $user->id)
+            ->pluck('artist_id');
+
+        $wishlistArtists = Artist::with(['review', 'experiences', 'festival', 'documents', 'user'])
+            ->whereIn('id', $wishlistArtistIds)
+            ->get();
+
+        $user->wishlist = AlbumForUserResource::collection($wishlistArtists);
+
+        // ------------------ Top Artists ------------------
+        $topArtists = Artist::with(['review', 'experiences', 'festival', 'documents', 'user'])
+            ->get()
+            ->filter(fn($artist) => $artist->review->avg('rating') > 0)
+            ->sortByDesc(fn($artist) => $artist->review->avg('rating'))
+            ->take(10)
+            ->values()
+            ->map(function ($artist) {
+                return [
+                    'id'             => $artist->id,
+                    'user_id'        => $artist->user_id,
+                    'name'           => $artist->user->name ?? null,
+                    'avatar'          => $artist->user->avatar ? url($artist->user->avatar) : null,
+
+                ];
+            });
+
+        $user->top_artists = $topArtists;
+
+        return Helper::jsonResponse(true, 'User details fetched successfully', 200, $user);
     }
-
-    // ------------------ Counts ------------------
-    $user->total_albums = $user->artists()->count();
-    $user->total_festables = Festival::count();
-
-    // ------------------ Wishlist ------------------
-    $wishlistArtistIds = DB::table('wishlists')
-        ->where('user_id', $user->id)
-        ->pluck('artist_id');
-
-    $wishlistArtists = Artist::with(['review', 'experiences', 'festival', 'documents', 'user'])
-        ->whereIn('id', $wishlistArtistIds)
-        ->get();
-
-    $user->wishlist = AlbumForUserResource::collection($wishlistArtists);
-
-    // ------------------ Top Artists ------------------
-    $topArtists = Artist::with(['review', 'experiences', 'festival', 'documents', 'user'])
-        ->get()
-        ->filter(fn($artist) => $artist->review->avg('rating') > 0)
-        ->sortByDesc(fn($artist) => $artist->review->avg('rating'))
-        ->take(10)
-        ->values()
-        ->map(function ($artist) {
-            return [
-                'id'             => $artist->id,
-                'user_id'        => $artist->user_id,
-                'name'           => $artist->user->name ?? null,
-                'avatar'          => $artist->user->avatar ? url($artist->user->avatar) : null,
-                
-            ];
-        });
-
-    $user->top_artists = $topArtists;
-
-    return Helper::jsonResponse(true, 'User details fetched successfully', 200, $user);
-}
 
 
     public function updateProfile(Request $request)
