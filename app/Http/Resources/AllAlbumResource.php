@@ -42,6 +42,7 @@ class AllAlbumResource extends JsonResource
             'type'           => $this->experiences && $this->experiences->first() ? $this->experiences->first()->status : null,
             'festival_name'  => $this->festival ? $this->festival->festival_name : null,
             'total_review'   => $this->review ? $this->review->count() : 0,
+            'locations'       => $this->experiences && $this->experiences->first() ? $this->experiences->first()->locations : null,
             'artist_image'   => url($this->image),
             'average_rating' => $averageRating ? round($averageRating, 2) : null,
             'published_at'   => $this->created_at ? $this->created_at->format('jS F'): null,

@@ -217,4 +217,14 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(FestiveAlbum::class);
     }
+
+    public function artists()
+    {
+        return $this->hasMany(Artist::class, 'user_id'); // adjust foreign key if needed
+    }
+
+    public function whishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 }

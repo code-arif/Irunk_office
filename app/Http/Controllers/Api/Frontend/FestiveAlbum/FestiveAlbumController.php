@@ -73,6 +73,7 @@ class FestiveAlbumController extends Controller
             'camp_experience' => $request->camp_experience,
             'festive_story' => $request->festive_story,
             'festive_date' => $request->festive_date,
+            'locations' => $request->locations ?? null,
             'day_type' => $request->day_type ?? 'none',
             'status' => $request->status ?? 'public',
             'fest_type' => $request->fest_type ?? 'previous',
@@ -130,8 +131,9 @@ class FestiveAlbumController extends Controller
         if (! $artist) {
             return response()->json([
                 'success' => false,
+                'code'    => 404,
                 'message' => 'Artist not found or unauthorized.'
-            ], 404);
+            ]);
         }
 
         // ✅ Update Festival by Name (if changed)
@@ -177,6 +179,7 @@ class FestiveAlbumController extends Controller
                 'camp_experience' => $request->camp_experience ?? $experience->camp_experience,
                 'festive_story'   => $request->festive_story ?? $experience->festive_story,
                 'festive_date'    => $request->festive_date ?? $experience->festive_date,
+                'locations'      => $request->locations ?? $experience->locations,
                 'status'          => $request->status ?? $experience->status,
                 'fest_type'       => $request->fest_type ?? $experience->fest_type,
             ]);
@@ -218,9 +221,9 @@ class FestiveAlbumController extends Controller
 
         return response()->json([
             'success' => true,
+            'code'    => 200,
             'message' => 'Festive Album updated successfully',
-            'artist' => $artist,
-            'experience' => $experience
+            
         ]);
     }
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('favourite_day');
             $table->string('camp_experience');
             $table->string('festive_story');
+            $table->string('locations')->nullable();
             $table->date('festive_date');
             $table->enum('day_type', ['single-day', 'none'])->default('none');
             $table->enum('status', ['public', 'private'])->default('public');

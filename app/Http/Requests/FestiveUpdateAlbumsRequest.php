@@ -35,6 +35,7 @@ class FestiveUpdateAlbumsRequest extends FormRequest
             'festive_date' => 'nullable|date',
             'status' => 'nullable|in:public,private',
             'fest_type' => 'nullable|string',
+            'locations' => 'nullable|string|max:255',
 
             // festive_documents table (multiple files)
             'documents' => 'nullable|array',

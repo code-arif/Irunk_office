@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api\Auth;
 use Stripe\Stripe;
 use Stripe\Account;
 use App\Models\User;
+use App\Models\Artist;
 use App\Helpers\Helper;
+use App\Models\Festival;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AllAlbumResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -30,44 +33,39 @@ class UserController extends Controller
             return Helper::jsonResponse(false, 'User not found', 404, null);
         }
 
-        // Convert to array for manipulation
-        $data = $user->toArray();
+        // Count albums/artists
+        $user->total_albums = $user->artists()->count();
 
-        $data['user_onboarding'] = !empty($user->stripe_account_id);
+        // Count total festivals
+        $user->total_festables = Festival::count();
 
+        // ========== WISHLIST ==========
+        $wishlistArtistIds = DB::table('wishlists')
+            ->where('user_id', $user->id)
+            ->pluck('artist_id');
 
-        // If user has stripe_account_id, fetch details from Stripe
-        if (!empty($user->stripe_account_id)) {
-            try {
-                Stripe::setApiKey(env('STRIPE_SECRET'));
-                $account = Account::retrieve($user->stripe_account_id);
-                $isActive = ($account->charges_enabled && $account->payouts_enabled && $account->details_submitted);
+        $wishlistArtists = Artist::whereIn('id', $wishlistArtistIds)
+            ->with(['review', 'experiences', 'festival', 'documents'])
+            ->get();
 
-                // Add account details (pick only what you need)
-                $data['stripe_account'] = [
-                    'id'              => $account->id,
-                    'stripe_account_activation' => $isActive,
-                    'email'           => $account->email,
-                    'type'            => $account->type,
-                    'charges_enabled' => $account->charges_enabled,
-                    'payouts_enabled' => $account->payouts_enabled,
-                    'details_submitted' => $account->details_submitted,
-                    'capabilities'    => $account->capabilities,
-                    'business_profile' => $account->business_profile,
-                    'created'         => $account->created,
+        $user->wishlist = AllAlbumResource::collection($wishlistArtists);
 
-                ];
-            } catch (\Exception $e) {
-                $data['stripe_account'] = [
-                    'error' => $e->getMessage()
-                ];
-            }
-        }
+        // ========== TOP ARTISTS (NEW) ==========
+        $topArtists = Artist::with(['review', 'experiences', 'festival', 'documents'])
+            ->get()
+            ->filter(function ($artist) {
+                $avg = $artist->review->avg('rating');
+                return $avg && $avg > 0;    
+            })
+            ->sortByDesc(function ($artist) {
+                return $artist->review->avg('rating');  
+            })
+            ->take(10)
+            ->values();
 
-        // Replace raw ID with its md5 hash
-        $data['id'] = md5($user->id);
+        $user->top_artists = AllAlbumResource::collection($topArtists);
 
-        return Helper::jsonResponse(true, 'User details fetched successfully', 200, $data);
+        return Helper::jsonResponse(true, 'User details fetched successfully', 200, $user);
     }
 
     public function updateProfile(Request $request)

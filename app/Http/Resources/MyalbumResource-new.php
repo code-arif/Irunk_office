@@ -38,6 +38,7 @@ class MyalbumResource extends JsonResource
                 'festive_story'   => $experience->festive_story,
                 'festive_date'    => $experience->festive_date,
                 'status'          => $experience->status,
+                'locations'       => $experience->locations,
                 'fest_type'       => $experience->fest_type,
                 'details'         => $experience->details,
             ] : null, // null if no experience
