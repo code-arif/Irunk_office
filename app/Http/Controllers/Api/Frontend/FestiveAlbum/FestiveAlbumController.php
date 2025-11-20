@@ -6,14 +6,15 @@ use App\Models\Artist;
 use App\Helpers\Helper;
 use App\Models\Festival;
 use App\Models\FestiveAlbum;
+use Illuminate\Http\Request;
 use App\Models\FestiveDocument;
 use App\Models\FestiveAlbumImage;
 use App\Models\FestiveExperience;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MyalbumResource;
+use App\Http\Resources\AllAlbumResource;
 use App\Http\Requests\FestiveAlbumsRequest;
 use App\Http\Requests\FestiveUpdateAlbumsRequest;
-use App\Http\Resources\AllAlbumResource;
 
 class FestiveAlbumController extends Controller
 {
@@ -252,28 +253,46 @@ class FestiveAlbumController extends Controller
     }
 
     // get my albums
-    public function myAlbums()
-    {
-        $user = auth('api')->user();
-        if (! $user) {
-            return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
-        }
-
-        $albums = Artist::with(['festival', 'experiences', 'documents'])
-            ->where('user_id', $user->id)->orderBy('created_at', 'desc')
-            ->get();
-
-        if ($albums->isEmpty()) {
-            return Helper::jsonResponse(false, 'No albums found.', 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'code'    => 200,
-            'message' => 'My Festive Albums',
-            'data'    => AllAlbumResource::collection($albums), // ✅ collection fix
-        ]);
+   public function myAlbums(Request $request)
+{
+    $user = auth('api')->user();
+    if (! $user) {
+        return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
     }
+
+    $type = $request->input('type'); // 1=public, 2=private
+    $status = null;
+
+    if ($type == 1) {
+        $status = 'public';
+    } elseif ($type == 2) {
+        $status = 'private';
+    }
+
+    $albumsQuery = Artist::with(['festival', 'documents', 'experiences'])
+        ->where('user_id', $user->id);
+
+    // Filter albums by experience status
+    if ($status) {
+        $albumsQuery->whereHas('experiences', function ($query) use ($status) {
+            $query->where('status', $status);
+        });
+    }
+
+    $albums = $albumsQuery->orderBy('created_at', 'desc')->get();
+
+    if ($albums->isEmpty()) {
+        return Helper::jsonResponse(false, 'No albums found.', 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'code'    => 200,
+        'message' => 'My Festive Albums',
+        'data'    => AllAlbumResource::collection($albums),
+    ]);
+}
+
 
     // Get Festive
     public function getFestive()
