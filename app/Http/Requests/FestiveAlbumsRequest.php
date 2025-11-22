@@ -33,7 +33,7 @@ class FestiveAlbumsRequest extends FormRequest
             'day_type'      => 'nullable|in:single-day,none',
             'camp_experience' => 'required|string|max:255',
             'festive_story' => 'required|string',
-            'festive_date' => 'required|date',
+            'festive_date' => 'nullable|date',
             'status' => 'nullable|in:public,private',
             'fest_type' => 'nullable|string',
 
