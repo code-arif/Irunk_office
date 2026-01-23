@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\FriendRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\UserFriendResource;
@@ -164,44 +165,51 @@ class FriendRequestController extends Controller
         }
 
         $receiver = auth('api')->user();
+        $senderId = $request->sender_id;
 
-        $friendRequest = FriendRequest::where('sender_id', $request->sender_id)
+        // Find pending request
+        $friendRequest = FriendRequest::where('sender_id', $senderId)
             ->where('receiver_id', $receiver->id)
             ->where('status', 'pending')
             ->first();
 
         if (!$friendRequest) {
-            return $this->error([], 'Friend request not found.', 404);
+            return $this->error([], 'Friend request not found or already processed.', 404);
         }
 
         try {
             DB::beginTransaction();
 
-            // Update request status
+            // Mark as accepted
             $friendRequest->update([
                 'status' => 'accepted',
-                'accepted_at' => Carbon::now(),
+                'accepted_at' => now(),
             ]);
 
-            // Create friendship (both sides)
-            Friend::create([
-                'user_id' => $receiver->id,
-                'friend_id' => $request->sender_id,
-                'became_friends_at' => Carbon::now(),
-            ]);
+            // Safe way: insert only if not exists (idempotent)
+            Friend::firstOrCreate(
+                ['user_id' => $receiver->id, 'friend_id' => $senderId],
+                ['became_friends_at' => now()]
+            );
 
-            Friend::create([
-                'user_id' => $request->sender_id,
-                'friend_id' => $receiver->id,
-                'became_friends_at' => Carbon::now(),
-            ]);
+            Friend::firstOrCreate(
+                ['user_id' => $senderId, 'friend_id' => $receiver->id],
+                ['became_friends_at' => now()]
+            );
 
             DB::commit();
 
             return $this->success([], 'Friend request accepted successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->error([], 'Something went wrong: ' . $e->getMessage(), 500);
+
+            // যদি duplicate entry error হয় তবুও success দাও (already friends)
+            if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                return $this->success([], 'You are already friends.');
+            }
+
+            Log::error('Accept friend request failed: ' . $e->getMessage());
+            return $this->error([], 'Something went wrong.', 500);
         }
     }
 
