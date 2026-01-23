@@ -174,7 +174,6 @@ Route::middleware(['auth:api'])->controller(NotificationController::class)->pref
 /*
 # Chat Route
 */
-
 Route::middleware(['auth:api'])->controller(ChatController::class)->prefix('auth/chat')->group(function () {
     Route::get('/list', 'list');
     Route::post('/send/{receiver_id}', 'send');
