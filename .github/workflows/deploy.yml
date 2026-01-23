@@ -14,7 +14,7 @@ jobs:
       - name: FTP-Deploy-Action
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
-          server: 76.13.27.152:8443
+          server: 76.13.27.152
           username: festquest
           password: W2E0ia1RpM1UfDKAibV6
 
