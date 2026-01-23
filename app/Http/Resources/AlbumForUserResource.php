@@ -5,14 +5,14 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class AllAlbumResource extends JsonResource
+class AlbumForUserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+   public function toArray(Request $request): array
     {
         $averageRating = $this->review->avg('rating');
 
@@ -43,7 +43,7 @@ class AllAlbumResource extends JsonResource
             'festival_name'  => $this->festival ? $this->festival->festival_name : null,
             'total_review'   => $this->review ? $this->review->count() : 0,
             'locations'       => $this->experiences && $this->experiences->first() ? $this->experiences->first()->locations : null,
-            'artist_image'   => url($this->image),
+            'avatar'   => url($this->user->avatar),
             'average_rating' => $averageRating ? round($averageRating, 2) : null,
             'published_at'   => $this->created_at ? $this->created_at->format('jS F'): null,
 

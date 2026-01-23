@@ -15,6 +15,7 @@ class FestiveExperience extends Model
         'festive_date',
         'status',
         'fest_type',
+        'locations',
     ];
 
     public function artist()

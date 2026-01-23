@@ -26,10 +26,15 @@ class Artist extends Model
     public function festival()
     {
         return $this->belongsTo(Festival::class);
-    }   
+    }
 
     public function review()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
