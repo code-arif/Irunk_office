@@ -163,7 +163,6 @@ Route::middleware(['auth:api'])->controller(FirebaseTokenController::class)->pre
 /*
 # In App Notification Route
 */
-
 Route::middleware(['auth:api'])->controller(NotificationController::class)->prefix('notify')->group(function () {
     Route::get('test', 'test');
     Route::get('/', 'index');
