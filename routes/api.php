@@ -111,7 +111,6 @@ Route::middleware(['auth:api'])->controller(FestiveAlbumController::class)->grou
     Route::get('/festival', 'getFestive');
 });
 
-// wishlist
 Route::middleware(['auth:api'])->controller(WishlistController::class)->group(function () {
     Route::post('/wishlist/{artist_id}', 'wishlist');
     Route::get('/get-wishlist', 'getWishlistItems');
