@@ -96,6 +96,8 @@ Route::middleware(['auth:api'])->controller(ImageController::class)->prefix('aut
     Route::post('/store', 'store');
     Route::get('/delete/{id}', 'destroy');
 });
+
+
 Route::middleware(['auth:api'])->controller(FestiveAlbumController::class)->group(function () {
     Route::post('/create-album', 'store');
     Route::post('/update-album/{id}', 'update');
@@ -211,4 +213,3 @@ Route::middleware(['auth:api'])->controller(ReviewController::class)->group(func
 // Festival
 
 Route::get('/festive', [FestiveAlbumController::class, 'getFestive']);
-

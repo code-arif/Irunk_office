@@ -4,7 +4,7 @@
     <div class="app-sidebar" style="overflow: scroll">
         <div class="side-header">
             <a class="header-brand1" href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset(settings()->logo ?? 'default/logo.svg') }}" id="header-brand-logo" alt="logo" width="{{ settings()->logo_width ?? 100 }}" height="{{ settings()->logo_height ?? 100 }}">
+                <img src="{{ asset('default/logo.png') }}" id="header-brand-logo" alt="logo" >
             </a>
         </div>
         <div class="main-sidemenu">
@@ -23,14 +23,14 @@
                         <span class=" side-menu__label">Dashboard</span>
                     </a>
                 </li>
-             
+
                  <li class="slide">
                     <a class="side-menu__item {{  request()->routeIs('admin.festival.*') ? 'has-link active' : '' }}" href="{{ route('admin.festival.index') }}">
                          <i class="fa-solid fa-church side-menu__icon"></i>
                         <span class="side-menu__label">Festival</span>
                     </a>
-                </li> 
-               
+                </li>
+
                 <!-- <li>
                     <h3>Components</h3>
                 </li> -->
@@ -67,7 +67,7 @@
                         <li><a href="{{ route('admin.permissions.index') }}" class="slide-item">Permission</a></li>
                     </ul>
                 </li> -->
-             
+
 
 
                 <li class="slide">
@@ -80,7 +80,7 @@
                     <ul class="slide-menu">
                         <li><a href="{{ route('admin.cms.privecyandterms.terms') }}" class="slide-item">Terms & Condition</a></li>
                         <li><a href="{{ route('admin.cms.privecyandterms.privacy') }}" class="slide-item">Privacy Policy</a></li>
-                        
+
                     </ul>
                 </li>
 

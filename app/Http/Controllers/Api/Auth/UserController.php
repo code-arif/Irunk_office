@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use Stripe\Stripe;
-use Stripe\Account;
 use App\Models\User;
 use App\Models\Artist;
 use App\Helpers\Helper;
@@ -14,8 +12,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AlbumForUserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Resources\MyalbumResource;
-use App\Http\Resources\AllAlbumResource;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -63,7 +59,6 @@ class UserController extends Controller
                     'user_id'        => $artist->user_id,
                     'name'           => $artist->user->name ?? null,
                     'avatar'          => $artist->user->avatar ? url($artist->user->avatar) : null,
-
                 ];
             });
 

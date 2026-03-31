@@ -3,9 +3,7 @@
 @section('content')
 <!-- CONTAINER OPEN -->
 <div class="col col-login mx-auto text-center">
-    <a href="index.html" class="text-center">
-        <img src="{{ asset($settings->logo ?? 'default/logo.svg') }}" class="header-brand-img" alt="">
-    </a>
+
 </div>
 <div class="container-login100">
     <div class="wrap-login100 p-0">
@@ -41,7 +39,7 @@
                 <div class="text-end pt-1">
                     <p class="mb-0"><a href="{{ route('password.request') }}" class="text-primary ms-1">Forgot Password?</a></p>
                 </div>
-                
+
                 @if(config('settings.recaptcha') === 'yes')
                 <div class="bi-login-input-wrapper save mt-3 mb-1">
                     {!! htmlFormSnippet() !!}

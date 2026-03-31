@@ -19,10 +19,10 @@ class FestiveAlbumsRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-   public function rules(): array
+    public function rules(): array
     {
         return [
-             'festival_name' => 'required|string',
+            'festival_name' => 'required|string',
             // artist table
             'name' => 'nullable|string|max:255',
             'image' => 'nullable',

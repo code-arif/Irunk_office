@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Api\Frontend\FestiveAlbum;
 use App\Models\Artist;
 use App\Helpers\Helper;
 use App\Models\Festival;
-use App\Models\FestiveAlbum;
 use Illuminate\Http\Request;
 use App\Models\FestiveDocument;
-use App\Models\FestiveAlbumImage;
 use App\Models\FestiveExperience;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MyalbumResource;
@@ -44,7 +42,7 @@ class FestiveAlbumController extends Controller
         }
 
 
-        // ✅ 1. Find Festival by Name
+        // 1. Find Festival by Name
         $festival = Festival::where('festival_name', 'LIKE', $request->festival_name)->first();
 
         if (!$festival) {
@@ -56,7 +54,7 @@ class FestiveAlbumController extends Controller
 
         $festival_id = $festival->id;
 
-        // ✅ 2. Upload Artist Image (public folder)
+        // 2. Upload Artist Image (public folder)
         $artistImageName = time() . '.' . $request->image->extension();
         $request->image->move(public_path('uploads/artists/images'), $artistImageName);
 
@@ -92,12 +90,12 @@ class FestiveAlbumController extends Controller
                     $folder = 'uploads/festive/images/';
                 }
 
-                // ✅ Create unique filename
+                // Create unique filename
                 $fileName = uniqid() . '.' . $extension;
                 $file->move(public_path($folder), $fileName);
                 FestiveDocument::create([
                     'artist_id' => $artist->id,
-                    'video_image' => $folder . $fileName,  // stored path
+                    'video_image' => $folder . $fileName,
                 ]);
             }
         }
@@ -124,7 +122,7 @@ class FestiveAlbumController extends Controller
             ], 401);
         }
 
-        // ✅ Find artist
+        // Find artist
         $artist = Artist::where('id', $artist_id)
             ->where('user_id', $user_id)
             ->first();
@@ -137,7 +135,7 @@ class FestiveAlbumController extends Controller
             ]);
         }
 
-        // ✅ Update Festival by Name (if changed)
+        // Update Festival by Name (if changed)
         if ($request->festival_name) {
             $festival = Festival::where('festival_name', $request->festival_name)->first();
 
@@ -151,7 +149,7 @@ class FestiveAlbumController extends Controller
             $artist->festival_id = $festival->id;
         }
 
-        // ✅ Update Artist Image
+        // Update Artist Image
         if ($request->hasFile('image')) {
 
             // delete previous image
@@ -224,7 +222,7 @@ class FestiveAlbumController extends Controller
             'success' => true,
             'code'    => 200,
             'message' => 'Festive Album updated successfully',
-            
+
         ]);
     }
 
@@ -253,45 +251,45 @@ class FestiveAlbumController extends Controller
     }
 
     // get my albums
-   public function myAlbums(Request $request)
-{
-    $user = auth('api')->user();
-    if (! $user) {
-        return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
+    public function myAlbums(Request $request)
+    {
+        $user = auth('api')->user();
+        if (! $user) {
+            return Helper::jsonResponse(false, 'Unauthorized. Please login.', 401);
+        }
+
+        $type = $request->input('type'); // 1=public, 2=private
+        $status = null;
+
+        if ($type == 1) {
+            $status = 'public';
+        } elseif ($type == 2) {
+            $status = 'private';
+        }
+
+        $albumsQuery = Artist::with(['festival', 'documents', 'experiences'])
+            ->where('user_id', $user->id);
+
+        // Filter albums by experience status
+        if ($status) {
+            $albumsQuery->whereHas('experiences', function ($query) use ($status) {
+                $query->where('status', $status);
+            });
+        }
+
+        $albums = $albumsQuery->orderBy('created_at', 'desc')->get();
+
+        if ($albums->isEmpty()) {
+            return Helper::jsonResponse(false, 'No albums found.', 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'code'    => 200,
+            'message' => 'My Festive Albums',
+            'data'    => AllAlbumResource::collection($albums),
+        ]);
     }
-
-    $type = $request->input('type'); // 1=public, 2=private
-    $status = null;
-
-    if ($type == 1) {
-        $status = 'public';
-    } elseif ($type == 2) {
-        $status = 'private';
-    }
-
-    $albumsQuery = Artist::with(['festival', 'documents', 'experiences'])
-        ->where('user_id', $user->id);
-
-    // Filter albums by experience status
-    if ($status) {
-        $albumsQuery->whereHas('experiences', function ($query) use ($status) {
-            $query->where('status', $status);
-        });
-    }
-
-    $albums = $albumsQuery->orderBy('created_at', 'desc')->get();
-
-    if ($albums->isEmpty()) {
-        return Helper::jsonResponse(false, 'No albums found.', 404);
-    }
-
-    return response()->json([
-        'success' => true,
-        'code'    => 200,
-        'message' => 'My Festive Albums',
-        'data'    => AllAlbumResource::collection($albums),
-    ]);
-}
 
 
     // Get Festive
