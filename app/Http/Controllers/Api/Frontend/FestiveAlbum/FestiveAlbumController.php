@@ -18,6 +18,8 @@ class FestiveAlbumController extends Controller
 {
     public function store(FestiveAlbumsRequest $request)
     {
+        // dd($request->all());
+
         $user_id = auth()->guard('api')->id();
 
         if (! $user_id) {
@@ -27,9 +29,8 @@ class FestiveAlbumController extends Controller
             ], 401);
         }
 
-
         // Validate date requirement based on fest_type
-        if ($request->fest_type == 'single-day') {
+        if ($request->day_type == 'single-day') {
             if (!$request->festive_date) {
                 return response()->json([
                     'success' => false,
@@ -37,11 +38,10 @@ class FestiveAlbumController extends Controller
                 ], 422);
             }
         } else {
-            // Auto-set date to NULL for other fest types
-            $request['festive_date'] = null;
+            $request->merge([
+                'festive_date' => null
+            ]);
         }
-
-
         // 1. Find Festival by Name
         $festival = Festival::where('festival_name', 'LIKE', $request->festival_name)->first();
 
@@ -55,8 +55,17 @@ class FestiveAlbumController extends Controller
         $festival_id = $festival->id;
 
         // 2. Upload Artist Image (public folder)
-        $artistImageName = time() . '.' . $request->image->extension();
-        $request->image->move(public_path('uploads/artists/images'), $artistImageName);
+        // $artistImageName = time() . '.' . $request->image->extension();
+        // $request->image->move(public_path('uploads/artists/images'), $artistImageName);
+
+        if ($request->hasFile('image')) {
+            $artistImageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('uploads/artists/images'), $artistImageName);
+
+            $imagePath = 'uploads/artists/images/' . $artistImageName;
+        } else {
+            $imagePath = null;
+        }
 
         $artist = Artist::create([
             'user_id' => $user_id,
