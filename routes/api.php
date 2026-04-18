@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\BoostingPayment;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\FriendsController;
@@ -13,24 +12,18 @@ use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\FirebaseTokenController;
 use App\Http\Controllers\Api\FriendRequestController;
 use App\Http\Controllers\Api\Frontend\HomeController;
-use App\Http\Controllers\Api\Frontend\PageController;
 use App\Http\Controllers\Api\Frontend\PostController;
 use App\Http\Controllers\Api\Frontend\ImageController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
-use App\Http\Controllers\Api\Frontend\categoryController;
 use App\Http\Controllers\Api\Frontend\SettingsController;
 use App\Http\Controllers\Api\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\Frontend\SubscriberController;
 use App\Http\Controllers\Api\Frontend\SocialLinksController;
-use App\Http\Controllers\Api\Frontend\SubcategoryController;
 use App\Http\Controllers\Api\Frontend\PrivecyPolicyController;
 use App\Http\Controllers\Api\Frontend\Review\ReviewController;
 use App\Http\Controllers\Api\Frontend\Users\UsersListController;
 use App\Http\Controllers\Api\Frontend\Wishlist\WishlistController;
-use App\Http\Controllers\Api\Frontend\AddTocart\AddToCartController;
-use App\Http\Controllers\Api\Gateway\Stripe\StripeOnBoardingController;
 use App\Http\Controllers\Api\Frontend\FestiveAlbum\FestiveAlbumController;
-
 
 
 // health check
@@ -41,8 +34,8 @@ Route::get('/health-check', function () {
 //page
 Route::get('/page/home', [HomeController::class, 'index']);
 
-Route::get('/category', [categoryController::class, 'index']);
-Route::get('/subcategory', [SubcategoryController::class, 'index']);
+// Route::get('/category', [categoryController::class, 'index']);
+// Route::get('/subcategory', [SubcategoryController::class, 'index']);
 
 Route::get('/social/links', [SocialLinksController::class, 'index']);
 Route::get('/settings', [SettingsController::class, 'index']);
@@ -53,13 +46,13 @@ Route::post('subscriber/store', [SubscriberController::class, 'store'])->name('a
 /*
 # Post
 */
-Route::middleware(['auth:api'])->controller(PostController::class)->prefix('auth/post')->group(function () {
-    Route::get('/', 'index');
-    Route::post('/store', 'store');
-    Route::get('/show/{id}', 'show');
-    Route::post('/update/{id}', 'update');
-    Route::delete('/delete/{id}', 'destroy');
-});
+// Route::middleware(['auth:api'])->controller(PostController::class)->prefix('auth/post')->group(function () {
+//     Route::get('/', 'index');
+//     Route::post('/store', 'store');
+//     Route::get('/show/{id}', 'show');
+//     Route::post('/update/{id}', 'update');
+//     Route::delete('/delete/{id}', 'destroy');
+// });
 
 // Friend request system
 Route::middleware('auth:api')->prefix('/friends')->group(function () {
