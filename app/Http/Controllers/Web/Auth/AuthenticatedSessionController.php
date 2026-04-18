@@ -32,8 +32,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerate();
             session()->put('t-success', 'Password Confirmed Successfully');
             return app(WebCustomRedirectMiddleware::class)->handle($request, function () {});
-
-        }else{
+        } else {
             return back()->withErrors([
                 'email' => 'The provided credentials do not match our records.',
             ]);

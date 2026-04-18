@@ -293,12 +293,19 @@ class FestiveAlbumController extends Controller
 
 
     // Get Festive
-    public function getFestive()
+    public function getFestive(Request $request)
     {
-        $festives = Festival::where('status', 'active')->get();
+        $query = Festival::where('status', 'active');
+
+        // Search by festival name
+        if ($request->filled('search')) {
+            $query->where('festival_name', 'LIKE', '%' . $request->search . '%');
+        }
+
+        $festives = $query->get();
 
         if ($festives->isEmpty()) {
-            return Helper::jsonResponse(false, 'No festive types found.', 404);
+            return Helper::jsonResponse(false, 'No festive found.', 404);
         }
 
         $festives = $festives->map(function ($festive) {
@@ -316,8 +323,9 @@ class FestiveAlbumController extends Controller
             'data'    => $festives,
         ]);
     }
-    // Public albums
 
+
+    // Public albums
     public function getPublicAlbums($status = 'public')
     {
         $user = auth('api')->user();
