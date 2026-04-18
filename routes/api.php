@@ -12,7 +12,6 @@ use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\FirebaseTokenController;
 use App\Http\Controllers\Api\FriendRequestController;
 use App\Http\Controllers\Api\Frontend\HomeController;
-use App\Http\Controllers\Api\Frontend\PostController;
 use App\Http\Controllers\Api\Frontend\ImageController;
 use App\Http\Controllers\Api\Auth\SocialLoginController;
 use App\Http\Controllers\Api\Frontend\SettingsController;
