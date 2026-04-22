@@ -227,4 +227,13 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Wishlist::class);
     }
+
+    /**
+     * Users blocked by this user
+     */
+    public function blockedUsers()
+    {
+        return $this->belongsToMany(User::class, 'blocked_users', 'user_id', 'blocked_user_id')
+            ->withTimestamps();
+    }
 }

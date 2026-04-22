@@ -65,8 +65,12 @@ Route::middleware('auth:api')->prefix('/friends')->group(function () {
 
 
     Route::get('/list', [FriendsController::class, 'friendList']); // all firend list all auth user
-
     Route::get('/users/{user}/', [FriendsController::class, 'userFriendList']); // Get another user's friend list
+
+    Route::post('/block', [FriendsController::class, 'blockUser']); // block user
+    Route::post('/unblock', [FriendsController::class, 'unblockUser']); // unblock user
+    Route::get('/blocked-list', [FriendsController::class, 'blockedList']); // blocked users list
+    Route::post('/unfriend', [FriendsController::class, 'unfriend']); // unfriend user
 });
 
 // Sinle chatting system
