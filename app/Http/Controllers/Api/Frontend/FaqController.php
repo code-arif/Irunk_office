@@ -14,7 +14,7 @@ class FaqController extends Controller{
 
         return $this->success(
             $faq,
-            'Incoming friend requests fetched successfully.'
+            'FAQ fetched successfully.'
         );
     }
 }
