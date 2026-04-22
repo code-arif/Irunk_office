@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\FriendsController;
 use App\Http\Controllers\Api\Auth\UserController;
 use App\Http\Controllers\Api\Auth\LoginController;
@@ -46,11 +47,11 @@ Route::post('subscriber/store', [SubscriberController::class, 'store'])->name('a
 # Post
 */
 // Route::middleware(['auth:api'])->controller(PostController::class)->prefix('auth/post')->group(function () {
-//     Route::get('/', 'index');
-//     Route::post('/store', 'store');
-//     Route::get('/show/{id}', 'show');
-//     Route::post('/update/{id}', 'update');
-//     Route::delete('/delete/{id}', 'destroy');
+// Route::get('/', 'index');
+// Route::post('/store', 'store');
+// Route::get('/show/{id}', 'show');
+// Route::post('/update/{id}', 'update');
+// Route::delete('/delete/{id}', 'destroy');
 // });
 
 // Friend request system
@@ -143,6 +144,9 @@ Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
     Route::delete('/delete-profile', [UserController::class, 'destroy']);
     Route::post('/change-password', [UserController::class, 'changePassword']);
 });
+
+// Contact Support
+Route::post('/contact/support', [ContactController::class, 'store']);
 
 // get faqs
 Route::get('/faq', [FaqController::class, 'index']);
