@@ -122,7 +122,7 @@ class FriendsController extends Controller
             DB::commit();
 
             return $this->success(null, 'User blocked successfully.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return $this->error([], 'Something went wrong: ' . $e->getMessage(), 500);
         }

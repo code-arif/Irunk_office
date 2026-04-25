@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\Frontend\FestiveAlbum;
 
 use App\Models\Artist;
-use App\Helpers\Helper;
 use App\Models\Festival;
 use Illuminate\Http\Request;
 use App\Models\FestiveDocument;
 use App\Models\FestiveExperience;
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MyalbumResource;
 use App\Http\Resources\AllAlbumResource;
@@ -16,10 +16,11 @@ use App\Http\Requests\FestiveUpdateAlbumsRequest;
 
 class FestiveAlbumController extends Controller
 {
+    /**
+     * Create a new festive album
+     */
     public function store(FestiveAlbumsRequest $request)
     {
-        // dd($request->all());
-
         $user_id = auth()->guard('api')->id();
 
         if (! $user_id) {
@@ -54,15 +55,9 @@ class FestiveAlbumController extends Controller
 
         $festival_id = $festival->id;
 
-        // 2. Upload Artist Image (public folder)
-        // $artistImageName = time() . '.' . $request->image->extension();
-        // $request->image->move(public_path('uploads/artists/images'), $artistImageName);
-
         if ($request->hasFile('image')) {
             $artistImageName = time() . '.' . $request->image->extension();
             $request->image->move(public_path('uploads/artists/images'), $artistImageName);
-
-            $imagePath = 'uploads/artists/images/' . $artistImageName;
         } else {
             $imagePath = null;
         }
@@ -109,7 +104,6 @@ class FestiveAlbumController extends Controller
             }
         }
 
-
         return response()->json([
             'success' => true,
             'message' => 'Festive album created successfully',
@@ -119,7 +113,9 @@ class FestiveAlbumController extends Controller
         ], 201);
     }
 
-
+    /**
+     * Update a festive album
+     */
     public function update(FestiveUpdateAlbumsRequest $request, $artist_id)
     {
         $user_id = auth()->guard('api')->id();
@@ -235,7 +231,9 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
-    // get all albums
+    /**
+     * Get all albums
+     */
     public function allAlbums()
     {
         $user = auth('api')->user();
@@ -259,7 +257,9 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
-    // get my albums
+    /**
+     * Get my albums
+     */
     public function myAlbums(Request $request)
     {
         $user = auth('api')->user();
@@ -300,8 +300,9 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
-
-    // Get Festive
+    /**
+     * Get festive
+     */
     public function getFestive(Request $request)
     {
         $query = Festival::where('status', 'active');
@@ -333,8 +334,9 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
-
-    // Public albums
+    /**
+     * Get public albums
+     */
     public function getPublicAlbums($status = 'public')
     {
         $user = auth('api')->user();
@@ -369,7 +371,9 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
-    // Get private albums
+    /**
+     * Get private albums
+     */
     public function getPrivateAlbums($status = 'private')
     {
         $user = auth('api')->user();
@@ -402,8 +406,9 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
-    // Album Details
-
+    /**
+     * Get album details
+     */
     public function albumDetails($id)
     {
         $user = auth('api')->user();
@@ -450,7 +455,9 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
-    // delete album image or video
+    /**
+     * Delete album image or video
+     */
     public function deleteDocuments($id)
     {
         $user = auth('api')->user();
@@ -483,7 +490,9 @@ class FestiveAlbumController extends Controller
         ]);
     }
 
-    // Delete album along with its images/videos
+    /**
+     * Delete album along with its images/videos
+     */
     public function destroy($id)
     {
         $user = auth('api')->user();

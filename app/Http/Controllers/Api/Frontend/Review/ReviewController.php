@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ReviewController extends Controller
 {
+    // Submit a review for an artist
     public function review(Request $request)
     {
         $user = auth()->guard('api')->user();
@@ -27,7 +28,6 @@ class ReviewController extends Controller
             'artist_id' => 'required|exists:artists,id',
             'rating'   => 'required|string|min:1|max:5',
             'comment'  => 'nullable|string|max:1000'
-
         ]);
 
         if ($validator->fails()) {
@@ -52,15 +52,12 @@ class ReviewController extends Controller
             ], 404);
         }
 
-
-
         $review = Review::create([
             'artist_id'  => $request->artist_id,
             'user_id'     => $user->id,
             'rating'      => $request->rating,
             'comment'     => $request->comment ?? ''
         ]);
-
 
         return response()->json([
             'status' => true,
@@ -69,9 +66,7 @@ class ReviewController extends Controller
         ]);
     }
 
-
     // Review comment
-
     public function commentOnReview(Request $request)
     {
         $user = auth()->guard('api')->user();

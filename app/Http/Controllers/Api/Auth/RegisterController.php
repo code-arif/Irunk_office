@@ -88,7 +88,7 @@ class RegisterController extends Controller
 
             $data = User::select('otp')->find($user->id);
 
-            //  Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your Email Address'));
+             Mail::to($user->email)->send(new OtpMail($user->otp, $user, 'Verify Your Email Address'));
 
             DB::commit();
 

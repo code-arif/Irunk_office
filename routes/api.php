@@ -95,29 +95,30 @@ Route::middleware(['auth:api'])->controller(ImageController::class)->prefix('aut
 });
 
 
-Route::middleware(['auth:api'])->controller(FestiveAlbumController::class)->group(function () {
-    Route::post('/create-album', 'store');
-    Route::post('/update-album/{id}', 'update');
-    Route::get('/all-albums', 'allAlbums');
-    Route::get('/my-albums', 'myAlbums');
-    Route::get('/public-albums', 'getPublicAlbums');
-    Route::get('/private-albums', 'getPrivateAlbums');
-    Route::delete('/delete-image/{id}', 'deleteDocuments');
-    Route::delete('/delete-album/{id}', 'destroy');
-
-    Route::get('/album-details/{id}', 'albumDetails');
-
-    Route::get('/festival', 'getFestive');
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::post('/create-album', [FestiveAlbumController::class, 'store']);
+    Route::post('/update-album/{id}', [FestiveAlbumController::class, 'update']);
+    Route::get('/all-albums', [FestiveAlbumController::class, 'allAlbums']);
+    Route::get('/my-albums', [FestiveAlbumController::class, 'myAlbums']);
+    Route::get('/public-albums', [FestiveAlbumController::class, 'getPublicAlbums']);
+    Route::get('/private-albums', [FestiveAlbumController::class, 'getPrivateAlbums']);
+    Route::delete('/delete-image/{id}', [FestiveAlbumController::class, 'deleteDocuments']);
+    Route::delete('/delete-album/{id}', [FestiveAlbumController::class, 'destroy']);
+    Route::get('/album-details/{id}', [FestiveAlbumController::class, 'albumDetails']);
+    Route::get('/festival', [FestiveAlbumController::class, 'getFestive']);
 });
 
+/**
+ * Wishlist Route
+ */
 Route::middleware(['auth:api'])->controller(WishlistController::class)->group(function () {
     Route::post('/wishlist/{artist_id}', 'wishlist');
     Route::get('/get-wishlist', 'getWishlistItems');
 });
 
-/*
-# Auth Route
-*/
+/**
+ * Auth Route
+ */
 Route::group(['middleware' => 'guest:api'], function ($router) {
     //register
     Route::post('register', [RegisterController::class, 'register']);
@@ -148,12 +149,14 @@ Route::group(['middleware' => ['auth:api', 'api-otp']], function ($router) {
 // Contact Support
 Route::post('/contact/support', [ContactController::class, 'store']);
 
-// get faqs
+/**
+ * Get Faq
+ */
 Route::get('/faq', [FaqController::class, 'index']);
 
-/*
-# Firebase Notification Route
-*/
+/**
+ * Firebase Notification Route
+ */
 Route::middleware(['auth:api'])->controller(FirebaseTokenController::class)->prefix('firebase')->group(function () {
     Route::get("test", "test");
     Route::post("token/add", "store");
@@ -161,9 +164,9 @@ Route::middleware(['auth:api'])->controller(FirebaseTokenController::class)->pre
     Route::post("token/delete", "deleteToken");
 });
 
-/*
-# In App Notification Route
-*/
+/**
+ * In App Notification Route
+ */
 Route::middleware(['auth:api'])->controller(NotificationController::class)->prefix('notify')->group(function () {
     Route::get('test', 'test');
     Route::get('/', 'index');
@@ -171,9 +174,9 @@ Route::middleware(['auth:api'])->controller(NotificationController::class)->pref
     Route::get('status/read/{id}', 'readSingle');
 });
 
-/*
-# Chat Route
-*/
+/**
+ * Chat Route
+ */
 Route::middleware(['auth:api'])->controller(ChatController::class)->prefix('auth/chat')->group(function () {
     Route::get('/list', 'list');
     Route::post('/send/{receiver_id}', 'send');
@@ -199,17 +202,12 @@ Route::controller(UsersListController::class)->group(function () {
     Route::get('/seller-details/{slug}', 'userDetails');
 });
 
-
-Route::middleware(['auth:api'])->controller(ReviewController::class)->group(function () {
-    Route::post('/review', 'review');
-    Route::post('/review-comment', 'commentOnReview');
-
-    Route::post('/review-like/{reviewId}', 'likeReview');
-    Route::post('/comment-like/{commentId}', 'likeComment');
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::post('/review', [ReviewController::class, 'review']);
+    Route::post('/review-comment', [ReviewController::class, 'commentOnReview']);
+    Route::post('/review-like/{reviewId}', [ReviewController::class, 'likeReview']);
+    Route::post('/comment-like/{commentId}', [ReviewController::class, 'likeComment']);
 });
 
-
-
 // Festival
-
 Route::get('/festive', [FestiveAlbumController::class, 'getFestive']);
